@@ -1,0 +1,21 @@
+package EnemyDeath
+import GameSystemConstants
+import ClosureTimers
+import PartyMissionSetup
+import BossLogic
+
+
+
+public function CreateEnemyUnit(int unitId, vec2 pos, angle facing) returns unit
+    var enemyPlayer = players[23]
+    var enemy =  createUnit(enemyPlayer, unitId, pos, facing)
+    EnemyUnits.addUnit(enemy)
+
+    return enemy
+
+init
+    doPeriodically(.2) cb ->
+        if(IsUnitGroupDeadBJ(EnemyUnits) and EnemyUnits.size() > 0)
+            ResetPartyAfterMission()
+            Log.info("All Enemies Dead")
+            CurrentBoss = null

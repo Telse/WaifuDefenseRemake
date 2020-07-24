@@ -1,0 +1,17 @@
+package UiUnitDeselect
+import ClosureEvents
+import UiSelectionConstants
+import SetButtonPositions
+
+init
+    EventListener.add(EVENT_PLAYER_UNIT_DESELECTED) ->
+        var play = GetTriggerPlayer()
+
+        if play == GetLocalPlayer()
+            for fd in PLAYER_UNIT_SELECTION
+                if fd.play == play
+                    
+                    fd.destr()
+                    PLAYER_UNIT_SELECTION.remove(fd)
+
+            play = null

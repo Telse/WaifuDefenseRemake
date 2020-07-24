@@ -1,0 +1,203 @@
+package FloatingDamage
+
+real MEAN_CHAR_WIDTH = 5.5
+real MAX_TEXT_SHIFT = 200.0
+real   FONT_SIZE = 0.024
+real DEFAULT_HEIGHT = 16.0
+string array PlayerColor
+    
+public function GetPlayerColorString(player play) returns string
+    return GetPlayerColor(play).toColor().toColorString()
+    
+public function ShowGeneralText(unit u, string color, string text)
+        texttag tt = CreateTextTag()
+        real shift = RMinBJ(StringLength(text)*MEAN_CHAR_WIDTH, MAX_TEXT_SHIFT )
+        string textie = "|CFF1CE6B9" + text + "|r"
+        
+        SetTextTagText(tt, textie , FONT_SIZE)
+        SetTextTagPos(tt, GetUnitX(u)-shift, GetUnitY(u), DEFAULT_HEIGHT)
+        SetTextTagVelocity(tt,0.0, 0.04)
+        SetTextTagVisibility(tt, true)
+        SetTextTagFadepoint(tt, 2.5)
+        SetTextTagLifespan(tt, 1)
+        SetTextTagPermanent(tt, false) 
+
+        tt = null
+        textie = null
+    
+public function ShowRegularText(unit u, string color, string damage)
+    
+        texttag tt = CreateTextTag()
+        real shift = RMinBJ(StringLength(damage)*MEAN_CHAR_WIDTH, MAX_TEXT_SHIFT) + GetRandomReal(10, 100)
+        string text = color +damage + "|r"
+        
+        SetTextTagText(tt, color +damage + "|r", FONT_SIZE)
+        SetTextTagPos(tt, GetUnitX(u)-shift, GetUnitY(u), DEFAULT_HEIGHT)
+        SetTextTagVelocity(tt,0.0, 0.04)
+        SetTextTagVisibility(tt, true)
+        SetTextTagFadepoint(tt, 2.5)
+        SetTextTagLifespan(tt, 1)
+        SetTextTagPermanent(tt, false)  
+        
+        text = null
+        tt = null
+    
+    
+public function ShowBigText(unit u, string color, string damage)
+    
+        texttag tt = CreateTextTag()
+        real shift = RMinBJ(StringLength(damage)*MEAN_CHAR_WIDTH, MAX_TEXT_SHIFT ) + GetRandomReal(10, 100)
+        string text = color + damage + "|r"
+        
+        SetTextTagText(tt, text, 0.048)
+        SetTextTagPos(tt, GetUnitX(u)-shift, GetUnitY(u), DEFAULT_HEIGHT)
+        SetTextTagVelocity(tt, 0.0, 0.04)
+        SetTextTagVisibility(tt, true)
+        SetTextTagFadepoint(tt, 2.5)
+        SetTextTagLifespan(tt, 1)
+        SetTextTagPermanent(tt, false)   
+
+        text = null
+        tt = null
+    
+    
+public function ShowText(unit u, string color, integer damage)
+    
+        if(damage >=1000)
+            
+            ShowBigText(u, color, I2S(damage))
+            
+        else
+            
+            ShowRegularText(u, color, I2S(damage))
+            
+    
+    
+public function ShowHealingText(unit u, string healing)
+    
+        texttag tt = CreateTextTag()
+        real shift = RMinBJ(StringLength(healing)*MEAN_CHAR_WIDTH, MAX_TEXT_SHIFT )
+        string text = "|CFF20C000" +healing + "|r"
+        
+        SetTextTagText(tt, text, FONT_SIZE)
+        SetTextTagPos(tt, GetUnitX(u)-shift, GetUnitY(u), DEFAULT_HEIGHT)
+        SetTextTagVelocity(tt, 0.0, 0.04)
+        SetTextTagVisibility(tt, true)
+        SetTextTagFadepoint(tt, 2.5)
+        SetTextTagLifespan(tt, 4.0)
+        SetTextTagPermanent(tt, false)
+        
+        text = null
+        tt = null
+
+public function ShowManaRestoreText(unit u, string healing)
+    
+        texttag tt = CreateTextTag()
+        real shift = RMinBJ(StringLength(healing)*MEAN_CHAR_WIDTH+60, MAX_TEXT_SHIFT )
+        string text = "|CFF0042FF" +healing + "|r"
+        
+        SetTextTagText(tt, text, FONT_SIZE)
+        SetTextTagPos(tt, GetUnitX(u)-shift, GetUnitY(u), DEFAULT_HEIGHT)
+        SetTextTagVelocity(tt, 0.0, 0.04)
+        SetTextTagVisibility(tt, true)
+        SetTextTagFadepoint(tt, 2.5)
+        SetTextTagLifespan(tt, 4.0)
+        SetTextTagPermanent(tt, false)
+        
+        text = null
+        tt = null
+    
+    
+public function ShowGoldBounty(unit u, integer bounty, player killer)
+    
+        texttag tt = CreateTextTag()
+        string text = "+" + I2S(bounty)
+        
+        SetTextTagText(tt, text, FONT_SIZE)
+        SetTextTagPos(tt, GetUnitX(u)-16.0, GetUnitY(u), 0.0)
+        SetTextTagColor(tt, 255, 220, 0, 255)
+        SetTextTagVelocity(tt, 0.0, 0.03)
+        SetTextTagVisibility(tt, GetLocalPlayer()==killer)
+        SetTextTagFadepoint(tt, 2.0)
+        SetTextTagLifespan(tt, 3.0)
+        SetTextTagPermanent(tt, false)
+        
+        text = null
+        tt = null
+    
+    
+public function ShowBouncyText(unit u, string damage)
+    
+        texttag tt = CreateTextTag()
+        real shift = RMinBJ(StringLength(damage)*MEAN_CHAR_WIDTH, MAX_TEXT_SHIFT )
+        string textie = "|CFF1CE6B9" + damage + "|r"
+        
+        real xvel = .01 + GetRandomInt(-3, 3)*.01
+        real yvel = .01 + GetRandomInt(-3, 3)*.01
+        
+        SetTextTagText(tt, textie , FONT_SIZE)
+        SetTextTagPos(tt, GetUnitX(u)-shift, GetUnitY(u), DEFAULT_HEIGHT)
+        SetTextTagVelocity(tt, xvel, yvel)
+        SetTextTagVisibility(tt, true)
+        SetTextTagFadepoint(tt, 2.5)
+        SetTextTagLifespan(tt, 1)
+        SetTextTagPermanent(tt, false)    
+        tt = null
+        textie = null
+    
+    
+public function ShowRedBouncyText(unit u, string damage)
+    
+        texttag tt = CreateTextTag()
+        real shift = RMinBJ(StringLength(damage)*MEAN_CHAR_WIDTH, MAX_TEXT_SHIFT )
+        string textie = "|c00FF0000" + damage + "|r"
+        
+        real xvel = .01 + GetRandomInt(-3, 3)*.01
+        real yvel = .01 + GetRandomInt(-3, 3)*.01
+        
+        SetTextTagText(tt, textie , FONT_SIZE)
+        SetTextTagPos(tt, GetUnitX(u)-shift, GetUnitY(u), DEFAULT_HEIGHT)
+        SetTextTagVelocity(tt, xvel, yvel)
+        SetTextTagVisibility(tt, true)
+        SetTextTagFadepoint(tt, 2.5)
+        SetTextTagLifespan(tt, 1)
+        SetTextTagPermanent(tt, false)    
+        tt = null
+        textie = null
+    
+    
+public function ShowBouncyHealingText(unit u, string damage)
+    
+        texttag tt = CreateTextTag()
+        real shift = RMinBJ(StringLength(damage)*MEAN_CHAR_WIDTH, MAX_TEXT_SHIFT )
+        string textie = "|CFF20C000" + damage + "|r"
+        
+        real xvel = .01 + GetRandomInt(-3, 3)*.01
+        real yvel = .01 + GetRandomInt(-3, 3)*.01
+        
+        SetTextTagText(tt, textie , FONT_SIZE)
+        SetTextTagPos(tt, GetUnitX(u)-shift, GetUnitY(u), DEFAULT_HEIGHT)
+        SetTextTagVelocity(tt, xvel, yvel)
+        SetTextTagVisibility(tt, true)
+        SetTextTagFadepoint(tt, 2.5)
+        SetTextTagLifespan(tt, 1)
+        SetTextTagPermanent(tt, false)    
+        tt = null
+        textie = null
+    
+    
+public function onInit()
+    
+         PlayerColor[0] = "|CFFFF0303" // red
+         PlayerColor[1] = "|CFF0042FF" // blue
+         PlayerColor[2] = "|CFF1CE6B9" // teal
+         PlayerColor[3] = "|CFF540081" // purple
+         PlayerColor[4] = "|CFFFFFF01" // yellow
+         PlayerColor[5] = "|CFFFE8A0E" // orange
+         PlayerColor[6] = "|CFF20C000" // green
+         PlayerColor[7] = "|CFFE55BB0" // pink
+         PlayerColor[8] = "|CFF959697" // grey
+         PlayerColor[9] = "|CFF7EBFF1" // light blue
+         PlayerColor[10] = "|CFF106246" // dark green
+         PlayerColor[11] = "|CFF4E2A04" // brown
+

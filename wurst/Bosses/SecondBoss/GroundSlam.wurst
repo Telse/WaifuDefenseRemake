@@ -1,0 +1,48 @@
+package GroundSlam
+import ISpell
+import BossHelpers
+import GroupUnitsInRange
+import ClosureTimers
+import Knockback3
+import Objects
+import Abilities
+import DamageTargetExtensions
+
+public class GroundSlam implements ISpell
+
+    bool _internalPauseTimer = false
+    real _pauseTime = 5.5
+    string _name = "Ground Slam"
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+
+        var casterPos = caster.getPos()
+
+        var distance = 300
+        doPeriodicallyCounted(1, 5) cb ->
+            caster.setAnimation("Attack Slam")
+
+            for int x = 0 to 10
+                var newPos = casterPos.polarOffset((x*36).fromRad(), distance.toReal())
+                SetBossAoeIndicator(newPos, 150, .5)
+
+            doAfter(.5) () ->
+                for int x = 0 to 10
+                    var newPos = casterPos.polarOffset((x*36).fromRad(), distance.toReal())
+                    var enemies = newPos.getEnemiesInRangeBoss(caster, 150)
+
+                    flashEffect(Objects.impaleTargetDust, newPos, 1)
+                    flashEffect(Abilities.warStompCaster, newPos, 1)
+
+                    for u in enemies
+                        caster.damageTargetEx(u, 50, DamageTypeCustom.NONE, false)
+                

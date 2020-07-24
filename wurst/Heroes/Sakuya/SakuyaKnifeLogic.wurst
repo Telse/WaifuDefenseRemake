@@ -1,0 +1,154 @@
+package SakuyaKnifeLogic
+
+import ClosureTimers
+import SakuyaKnivesInitialHash
+import Sakuya
+import SakuyaKnifeDummy
+import GroupUnitsInRange
+import DamageTargetExtensions
+import TerrainUtils
+import GameSystemConstants
+
+function CheckCliffCollision(unit u, int speed, real currentZ) returns boolean
+    boolean cliffFound = false
+    var unitLoc = u.getLoc()
+    location checkCliffLocation = null
+
+    for int x = 0 to speed step 40
+        checkCliffLocation = PolarProjectionBJ(unitLoc, x.toReal(), u.getFacing())
+        
+        if (GetLocationZ(checkCliffLocation) > currentZ + 40)
+            RemoveLocation(checkCliffLocation)
+            RemoveLocation(unitLoc)
+
+            unitLoc = null
+            checkCliffLocation = null
+            return true
+
+    RemoveLocation(checkCliffLocation)
+    RemoveLocation(unitLoc)
+
+    unitLoc = null
+    checkCliffLocation = null
+    return false
+
+// function GetDeflectionAngle(unit enumUnit, real currentZ) returns real
+//     real angle = GetUnitFacing(enumUnit)
+//     real eastAndWest = 180 - angle 
+//     real northAndSouth =  -1 * angle 
+//     vec3 unitLoc = enumUnit.getPos3Real()
+    
+//     vec3 eastWestLoc = unitLoc.polarProject(20, 
+//                                 eastAndWest.fromDeg(), 
+//                                 eastAndWest.fromDeg())
+//     vec3 northSouthLoc = unitLoc.polarProject(20, 
+//                                  northAndSouth.fromDeg(), 
+//                                  northAndSouth.fromDeg())
+        
+//     //Log.info("EastWest: " + eastWestLoc.z.toString() + " SouthNorth: " + northSouthLoc.z.toString() + " UnitFace: " + enumUnit.getFacingAngle().degrees().toString())
+
+//     if(eastWestLoc.z > unitLoc.z)
+//         return northAndSouth
+        
+//     else if(northSouthLoc.z > unitLoc.z)  
+//         return eastAndWest
+    
+//     return 0.0
+
+function GetDeflectionAngle(unit enumUnit, real currentZ) returns real
+    real angle = GetUnitFacing(enumUnit)
+    real eastAndWest = 180 - angle 
+    real northAndSouth =  -1 * angle 
+    location unitLoc = GetUnitLoc(enumUnit)
+    location eastWestLoc = PolarProjectionBJ(unitLoc, 20, eastAndWest)
+    location northSouthLoc = PolarProjectionBJ(unitLoc, 20, northAndSouth)
+        
+    if(GetLocationZ(eastWestLoc) > GetLocationZ(unitLoc))
+        RemoveLocation(eastWestLoc)
+        RemoveLocation(northSouthLoc)
+        RemoveLocation(unitLoc)
+        unitLoc = null
+        eastWestLoc = null
+        northSouthLoc = null
+            
+        return northAndSouth
+    
+    else if(GetLocationZ(northSouthLoc) > GetLocationZ(unitLoc))
+        RemoveLocation(eastWestLoc)
+        RemoveLocation(northSouthLoc)
+        RemoveLocation(unitLoc)
+        unitLoc = null
+        eastWestLoc = null
+        northSouthLoc = null
+            
+        return eastAndWest
+
+    return 0.0
+    
+init 
+    doPeriodically(.03) cb ->
+
+        for u in SakuyaKnivesInitialHashUnitGroup
+            var speed = LoadIntegerBJ(StringHashBJ("Speed"), GetHandleIdBJ(u), SakuyaKnivesInitialHash)
+            real currentZ = LoadRealBJ(StringHashBJ("Current Z"), GetHandleIdBJ(u), SakuyaKnivesInitialHash)
+            var tempDuration = LoadRealBJ(StringHashBJ("Duration"), GetHandleIdBJ(u), SakuyaKnivesInitialHash)
+            var damage = LoadRealBJ(StringHashBJ("Damage"), GetHandleIdBJ(u), SakuyaKnivesInitialHash)
+            var unitPos = u.getPos()
+            real distanceFound = 0
+            var sakuya = PlayerUnits.filter(t -> t.getTypeId() == SAKUYA_ID).getFirst()
+
+            if(tempDuration > 0)
+                if u.getPos3Real().z < currentZ
+                    currentZ = u.getPos3Real().z
+
+                //if(u.getPos().isTerrainWalkable() == false)    
+                if CheckCliffCollision(u, speed, currentZ) == true
+                    var newPos = unitPos.polarOffset(u.getFacingAngle(), -40)
+
+                    var dummy = CreateUnit(GetOwningPlayer(sakuya),
+                            SAKUYA_KNIFE_DUMMY_UNIT, 
+                            GetUnitX(u), 
+                            GetUnitY(u), 
+                            GetDeflectionAngle(u, currentZ))
+                    dummy.setPos(newPos)
+
+                    damage += GetHeroAgi(sakuya, true) * 1.0
+                    GroupAddUnit(SakuyaKnivesInitialHashUnitGroup, dummy)
+                    
+                    tempDuration -= .03
+                    SaveRealBJ(tempDuration, StringHashBJ("Duration"), GetHandleIdBJ(dummy), SakuyaKnivesInitialHash)
+                    SaveRealBJ(currentZ, StringHashBJ("Current Z"), GetHandleIdBJ(dummy), SakuyaKnivesInitialHash)
+                    SaveRealBJ(damage, StringHashBJ("Damage"), GetHandleIdBJ(dummy), SakuyaKnivesInitialHash)
+                    SaveSakuyaKnivesInitialHashUnitDuration(dummy, tempDuration)
+                    SaveSakuyaKnivesInitialHashUnitSpeed(dummy, speed)
+                    
+                    GroupRemoveUnit(SakuyaKnivesInitialHashUnitGroup, u)
+                    GroupRemoveUnitSimple(u, SakuyaKnivesInitialHashUnitGroup)
+                    FlushChildHashtableBJ(GetHandleIdBJ(u), SakuyaKnivesInitialHash)
+                    
+                    RemoveUnit(u)
+                    dummy =null
+
+                else
+                    var newPos = unitPos.polarOffset(u.getFacingAngle(), speed.toReal())    
+                    u.setPos(newPos)
+
+                    tempDuration -= .03
+                    SaveRealBJ(tempDuration, StringHashBJ("Duration"), GetHandleIdBJ(u), SakuyaKnivesInitialHash)
+                    SaveRealBJ(currentZ, StringHashBJ("Current Z"), GetHandleIdBJ(u), SakuyaKnivesInitialHash)
+
+                var enemies = u.getEnemiesInRange(u, 50)
+
+                for un in enemies
+                    sakuya.damageTargetEx(un, damage, DamageTypeCustom.SPELL, false)
+                    tempDuration = -1
+                    SaveRealBJ(tempDuration, StringHashBJ("Duration"), GetHandleIdBJ(u), SakuyaKnivesInitialHash)
+                
+                enemies.destr()
+                    
+            else
+                KillUnit(u)
+                RemoveUnit(u)
+                GroupRemoveUnitSimple(u, SakuyaKnivesInitialHashUnitGroup)
+                FlushChildHashtableBJ(GetHandleIdBJ(u), SakuyaKnivesInitialHash)
+            

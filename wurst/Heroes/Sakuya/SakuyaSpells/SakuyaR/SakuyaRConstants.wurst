@@ -1,0 +1,32 @@
+package SakuyaRConstants
+import DamageTargetExtensions
+
+@configurable public real BASE_DAMAGE = 100
+@configurable public real BONUS_DAMAGE 
+@configurable public DamageTypeCustom DAMAGE_TYPE = DamageTypeCustom.SPELL
+              
+@configurable public string SPELL_EFFECT_PATH = "SakuyaWorld.mdx"
+@configurable public string SECONDARY_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\BloodElfSpellThiefBlood.mdl"
+@configurable public string THIRD_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl"
+@configurable public string FOURTH_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\HumanBloodLarge0.mdl"
+@configurable public string FIFTH_SPELL_EFFECT_PATH = "baojiang.mdx"
+
+@configurable public string BONUS_EFFECT_PATH 
+@configurable public real SPELL_EFFECT_DURATION
+@configurable public real SPELL_RADIUS = 75 
+@configurable public real SPELL_CAST_RANGE = 700
+
+@configurable public string SPELL_ICON 
+@configurable public string SPELL_NAME 
+@configurable public string SPELL_TT_NORMAL = "Sakuya's World"
+@configurable public string SPELL_TT_EXTENDED  = "[Active]|n|nOne of Sakuya's strongest time manipulation spells. An unfair spell that completely stops time around her so she can attack uninhibited.|n|nSpecial: Pauses all enemy units in range|nSpecial 2: Doubles the speed and damage of all knives while active|nSpecial 3: Knives won't launch until the spell ends|nSpecial 4: Allies are unaffected by the pause|nCast Time: 1.5s|nRange: 3000|nDuration: 8s|nCooldown: 48s"
+              
+@configurable public real BUFF_DURATION = 8
+@configurable public string BUFF_EFFECT_PATH 
+              
+@configurable public string BUFF_NAME 
+@configurable public string BUFF_TT 
+              
+@configurable public real INT_MULTIPLIER = 3
+@configurable public real STRENGTH_MULTIPLIER = 2
+@configurable public real AGI_MULTIPLIER = 0

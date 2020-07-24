@@ -1,0 +1,3 @@
+package PlayerStatsHashtable
+
+public hashtable playerStats = InitHashtable()

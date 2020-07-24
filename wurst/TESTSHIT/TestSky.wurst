@@ -1,0 +1,6 @@
+package TestSky
+import ClosureTimers
+
+init
+    doAfter(.1) ->
+        SetSkyModel("Environment\\Sky\\DistantLand\\DistantLand.mdx")

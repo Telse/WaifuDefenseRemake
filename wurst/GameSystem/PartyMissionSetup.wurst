@@ -1,0 +1,24 @@
+package PartyMissionSetup
+import GameSystemConstants
+
+public function SetUpPartyForMission(rect spawn, rect visionRadius)
+    for u in PlayerUnits
+        u.setPos(spawn.getCenter())
+        u.getOwner().setCameraBoundsToRect(visionRadius)
+        u.getOwner().smartCameraPan(spawn.getCenter(), .5)
+
+
+public function ResetPartyAfterMission()
+        for u in EnemyUnits
+            u.kill()
+            u.remove()
+        
+        EnemyUnits.clear()
+
+        for u in PlayerUnits
+            u.revive(gg_rct_Lobby.getCenter(), true)
+            SetUpPartyForMission(gg_rct_Lobby, gg_rct_Lobby)
+            
+
+
+

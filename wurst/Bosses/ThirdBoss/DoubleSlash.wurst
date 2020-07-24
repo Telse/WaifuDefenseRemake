@@ -1,0 +1,128 @@
+package DoubleSlash
+import ISpell
+import ClosureTimers
+import Knockback3
+import GroupExtensions
+import BossHelpers
+import GroupUnitsInRange
+import DamageTargetExtensions
+import Abilities
+
+public class DoubleSlash implements ISpell
+
+    bool _internalPauseTimer = false
+    real _pauseTime = 3
+    string _name = "Double Slash"
+
+    real reactTime = 1.5
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+
+        SetUnitTimeScalePercent(caster, 60)
+
+        doAfter(.4) () ->
+            var temp = caster.getClosestEnemyToUnit(5000)
+            var angle = caster.getPos().angleTo(temp.getPos())
+
+            Knockback3.add(caster, 750., angle, 90 .fromDeg())
+
+            if caster.isAlive()
+                firstSlash(caster, angle)
+
+            temp = null
+
+    
+        doAfter(1.6) () ->
+            var temp = caster.getClosestEnemyToUnit(5000)
+            var angle = caster.getPos().angleTo(temp.getPos())
+
+            Knockback3.add(caster, 1500., angle, 90 .fromDeg())
+
+            if caster.isAlive()
+                secondSlash(caster, angle)
+
+            temp = null
+
+        doAfter(_pauseTime) () ->
+            SetUnitTimeScalePercent(caster, 100)
+            
+    function firstSlash(unit caster, angle angle)
+        var second = caster.getPos().polarOffset(angle, 300)
+        var third= caster.getPos().polarOffset(angle + 22 .fromDeg(), 300)
+        var first= caster.getPos().polarOffset(angle - 22 .fromDeg(), 300)
+        
+        caster.setFacing(angle)
+        caster.setAnimation(6)
+
+        doAfter(.1) () ->
+            SetBossAoeIndicator(first, 180, .33)
+
+        doAfter(.2) () ->
+            SetBossAoeIndicator(second, 180, .66)
+
+        doAfter(.3) () ->
+            SetBossAoeIndicator(third, 180, 1)
+
+        doAfter(.33) () ->
+            first.damageTargetEnemyGroupEx(caster, 180, 200, DamageTypeCustom.SPELL, false)
+            flashEffect(Abilities.thunderclapCaster, first)
+
+        doAfter(.66) () ->
+            second.damageTargetEnemyGroupEx(caster, 180, 200, DamageTypeCustom.SPELL, false)
+            flashEffect(Abilities.thunderclapCaster, second)
+
+        doAfter(1) () ->
+            third.damageTargetEnemyGroupEx(caster, 180, 200, DamageTypeCustom.SPELL, false)
+            flashEffect(Abilities.thunderclapCaster, third)
+    
+    function secondSlash(unit caster, angle angle)
+        caster.setAnimation(17)
+        caster.setFacing(angle)
+
+        var first = caster.getPos().polarOffset(angle + 22 .fromDeg(), 450)
+        var second = caster.getPos().polarOffset(angle, 450)
+        var third = caster.getPos().polarOffset(angle - 22 .fromDeg(), 400)
+        var fourth = caster.getPos().polarOffset(angle - 44 .fromDeg(), 375)
+        var fifth = caster.getPos().polarOffset(angle - 66 .fromDeg(), 350)
+
+        doAfter(.05) () ->
+            SetBossAoeIndicator(first, 180, .33)
+
+        doAfter(.1) () ->
+            SetBossAoeIndicator(second, 180, .66)
+            SetBossAoeIndicator(third, 180, .66)
+
+        doAfter(.15) () ->
+            SetBossAoeIndicator(fourth, 180, 1)
+            SetBossAoeIndicator(fifth, 150, 1)
+
+
+        doAfter(.33) () ->
+            first.damageTargetEnemyGroupEx(caster, 180, 200, DamageTypeCustom.SPELL, false)
+            flashEffect(Abilities.thunderclapCaster, first)
+
+
+        doAfter(.66) () ->
+            second.damageTargetEnemyGroupEx(caster, 180, 200, DamageTypeCustom.SPELL, false)
+            flashEffect(Abilities.thunderclapCaster, second)
+
+            third.damageTargetEnemyGroupEx(caster, 180, 200, DamageTypeCustom.SPELL, false)
+            flashEffect(Abilities.thunderclapCaster, third)
+
+        doAfter(1) () ->
+            fourth.damageTargetEnemyGroupEx(caster, 180, 200, DamageTypeCustom.SPELL, false)
+            flashEffect(Abilities.thunderclapCaster, fourth)
+
+            fifth.damageTargetEnemyGroupEx(caster, 180, 200, DamageTypeCustom.SPELL, false)
+            flashEffect(Abilities.thunderclapCaster, fifth)
+
+

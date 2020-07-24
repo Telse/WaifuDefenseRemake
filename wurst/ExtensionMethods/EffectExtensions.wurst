@@ -1,0 +1,40 @@
+package EffectExtensions
+
+public function effect.setEffectFacingXY(effect eff, real x_target, real y_target)
+    real dx = x_target - BlzGetLocalSpecialEffectX(this)
+    real dy = y_target - BlzGetLocalSpecialEffectY(this)
+    BlzSetSpecialEffectOrientation(this, 0, 0, Atan2(dy, dx))
+
+
+public function effect.setEffectFacingXYZ(effect eff, real x_target, real y_target, real z_target)
+    real dx = x_target - BlzGetLocalSpecialEffectX(this)
+    real dy = y_target - BlzGetLocalSpecialEffectY(this)
+    real dz = z_target - BlzGetLocalSpecialEffectZ(this)
+     
+    real yaw
+    real pitch
+    real roll
+    real py
+    real px
+    real ix = RAbsBJ(dx)
+    real iy = RAbsBJ(dy)
+     
+    roll = Atan2(dy,dx)
+    py = (1-(ix/(ix+iy)))
+
+    if not (dy == 0)
+        yaw = Atan(dz/dy)*py
+        if dy < 0
+            //set yaw = -yaw
+    else
+        yaw = 0
+    
+    px = (1-(iy/(ix+iy)))
+    if not (dx == 0)
+        pitch = -Atan(dz/dx)*px
+        if dx < 0
+            //set pitch = -pitch
+    else
+        pitch = 0
+     
+    BlzSetSpecialEffectOrientation(this, yaw, pitch, roll)

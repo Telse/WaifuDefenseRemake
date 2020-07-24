@@ -1,0 +1,56 @@
+package SeinR
+import ClosureEvents
+import SeinRObjects
+import BuffObjEditing
+import HashMap
+import ClosureTimers
+import GroupUnitsInRange
+import SeinRConstants
+import SpellDamageCalculationExtensions
+
+public let SEIN_R_BUFF_ID = SEIN_R_BUFF_OBJ.abilId
+public let SEIN_R_BUFFMAP = new HashMap<unit, CallbackSingle>
+public let SEIN_R_HASH = InitHashtable()
+string hashKey = "SeinRShield"
+
+public function SeinRDamageShield(unit target, real damage) returns real
+    if(target.hasAbility(SEIN_R_BUFF_ID))
+        var shieldAmount  = SEIN_R_HASH.loadReal(target.getHandleId(), hashKey.getHash())
+
+        if damage > shieldAmount
+            shieldAmount = 0
+            SEIN_R_HASH.saveReal(target.getHandleId(), hashKey.getHash(), shieldAmount)
+            return damage - shieldAmount
+        
+        else
+            shieldAmount -= damage
+            SEIN_R_HASH.saveReal(target.getHandleId(), hashKey.getHash(), shieldAmount)
+            return 0.0
+    return damage
+
+init
+    registerSpellEffectEvent(SEIN_R_ID) ->
+        var targetPos = getSpellTargetPos()
+        var tU = GetTriggerUnit()
+
+        tU.setPos(targetPos)
+
+        real shieldAmount = tU.calculateSpellDamage(
+            STRENGTH_MULTIPLIER, 
+            AGI_MULTIPLIER, 
+            INT_MULTIPLIER, 
+            BASE_SHIELD, 
+            SEIN_R_ID)
+            
+        var allies = tU.getAlliesInRange(tU, 600)
+        allies.removeUnit(tU)
+
+        for u in allies
+            u.addAbility(SEIN_R_BUFF_ID)
+            SEIN_R_HASH.saveReal(u.getHandleId(), hashKey.getHash(), shieldAmount)
+
+            let cb = doAfter(BUFF_DURATION) ->
+                if SEIN_R_BUFFMAP.has(u)
+                    SEIN_R_BUFFMAP.remove(u)
+                    u.removeAbility(SEIN_R_BUFF_ID)
+            SEIN_R_BUFFMAP.put(u, cb)

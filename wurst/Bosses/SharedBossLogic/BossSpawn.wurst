@@ -1,0 +1,28 @@
+package BossSpawn
+import ClosureTimers
+import MissionVoting
+import MissionItems
+import PartyMissionSetup
+import BossLogic
+import Boss1
+import Boss2
+import IBoss
+import Boss3
+
+
+init
+    doPeriodically(1) cb ->
+        if PlayersVotedForMission(M1_ITEM_ID)
+            CurrentBoss = new Boss1()
+            PLAYER_VOTES.clear()
+            SetUpPartyForMission(gg_rct_Boss1TeamSpawn, gg_rct_Boss1VisionRange)
+
+        else if PlayersVotedForMission(M2_ITEM_ID)
+            CurrentBoss = new Boss2()
+            PLAYER_VOTES.clear()
+            SetUpPartyForMission(gg_rct_Boss2TeamSpawn, gg_rct_Boss2VisionRange)
+
+        else if PlayersVotedForMission(M3_ITEM_ID)
+            CurrentBoss = new Boss3()
+            PLAYER_VOTES.clear()
+            SetUpPartyForMission(gg_rct_Boss3TeamSpawn, gg_rct_Boss3VisionRange)

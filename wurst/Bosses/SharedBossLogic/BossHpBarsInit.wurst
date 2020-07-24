@@ -1,0 +1,27 @@
+package BossHpBarsInit
+import IBoss
+import Bar
+import ClosureTimers
+
+public Bar BossHpBar
+
+public Bar BossRageBar
+
+function CreateBossHpBars()
+    BossHpBar = new Bar(
+        vec2(.41, .57), 
+        .33, 
+        .015, 
+        PLAYER_COLOR_NAMES[0].toPlayerColor())
+
+    BossRageBar = new Bar(
+        vec2(.41, .555), 
+        .33, 
+        .015, 
+        PLAYER_COLOR_NAMES[4].toPlayerColor())
+
+init
+    doAfter(.2) ->
+        CreateBossHpBars()
+        BossHpBar.hide(localPlayer)
+        BossRageBar.hide(localPlayer)

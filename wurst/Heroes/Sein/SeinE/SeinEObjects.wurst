@@ -1,0 +1,39 @@
+package SeinEObjects
+import ChannelAbilityPreset
+import SeinEConstants
+import Icons
+import BuffObjEditing
+import Abilities
+import AbilityTooltipsHelpers
+
+public constant SEIN_E_ID = compiletime(ABIL_ID_GEN.next())
+public constant SEIN_E_BUFF_OBJ = compiletime(createDummyBuffObject("Cover", 
+                                                                    "Damage this unit takes is redirected to Sein.", 
+                                                                    Icons.bTNBearBlink, 
+                                                                    Abilities.voodooAuraTarget, 
+                                                                    "chest"))
+
+public constant SEIN_E_SELF_BUFF_OBJ = compiletime(createDummyBuffObject("Protector", 
+                                                                         "Whenever this unit attacks, she restores HP",
+                                                                         Icons.bTNBarkSkin, 
+                                                                         Abilities.manaShieldCaster, 
+                                                                         "origin"))
+
+@compiletime function createSpell()
+    new ChannelAbilityPreset(SEIN_E_ID, 5, true)
+        ..setHeroAbility(true)
+        ..presetHotkey("E")
+        ..setName("Sein E")
+        ..setButtonPositionNormalX(2)
+        ..setButtonPositionNormalY(2)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, GenerateSpellName(SPELL_TT_NORMAL))
+        ..setTooltipNormalExtended(1, GenerateSpellBody(SPELL_TT_EXTENDED))
+        ..presetTargetTypes(Targettype.NONE)
+        ..setLevels(5)
+        ..presetCastRange(lvl -> SPELL_CAST_RANGE)
+        ..presetManaCost(lvl -> 20)
+        ..presetCooldown(lvl -> 30)
+        ..presetIcon(Icons.bTNBreathOfFire)
+        ..presetCastRange(lvl -> 700.0)

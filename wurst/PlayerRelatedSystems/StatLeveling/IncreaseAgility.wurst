@@ -1,0 +1,32 @@
+package IncreaseAgility
+import ChannelAbilityPreset
+import ClosureEvents
+
+public constant INCREASEAGILITY_ID = compiletime(ABIL_ID_GEN.next())
+
+@compiletime function CreateIncreaseAgility()
+    new ChannelAbilityPreset(INCREASEAGILITY_ID, 1, true)
+        ..setHeroAbility(false)
+        ..setHotkeyNormal("W")
+        ..presetTargetTypes(Targettype.NONE)
+        ..setManaCost(1, 0)
+        ..presetCooldown(lvl -> .1)
+        ..setName("Increase Agility")
+        ..setButtonPositionNormalX(1)
+        ..setButtonPositionNormalY(0)
+        ..setButtonPositionResearchX(1)
+        ..setButtonPositionResearchY(0)
+        ..setTooltipNormal(1, "Increase Agility - [W]")
+        ..setTooltipNormalExtended(1, "Cost: 1 stat point |n|nIncreases Agility by 1.")
+        ..setIconNormal("UI\\Widgets\\Console\\Human\\infocard-heroattributes-agi.blp")
+
+init   
+    registerSpellEffectEvent(INCREASEAGILITY_ID) ->
+        let tp = GetTriggerPlayer()
+        var u = GetTriggerUnit()
+
+        if(tp.getLumber() >= 1)
+            tp.setLumber(tp.getLumber()-1)
+            u.addAgi(1)
+        else
+            tp.print("Insufficient Stat points!", 1.5)

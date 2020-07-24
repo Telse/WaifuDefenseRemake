@@ -1,0 +1,108 @@
+package Earthquake
+import ISpell
+import DummyCaster
+import AbilityObjEditing
+import ObjectIdGenerator
+import BossHelpers
+import PlayerEvents
+import ClosureTimers
+import Abilities
+import GroupUnitsInRange
+import Vector2Extensions
+import Knockback3
+import DamageTargetExtensions
+
+constant EARTHQUAKE_DUMMY_ID = compiletime(ABIL_ID_GEN.next())
+
+@compiletime function genBoss2EarthQuakeDummy()
+    new AbilityDefinitionFarseerEarthquake(EARTHQUAKE_DUMMY_ID)
+    ..setDummyAbility()
+    ..setDurationNormal(1, 5.)
+    ..setDurationHero(1, 5.)
+    ..setAreaofEffect(1, 1000)
+    ..setFinalArea(1, 1000)
+    ..setUnitsSlowed(1, .10)
+
+public class Earthquake implements ISpell
+
+    bool _internalPauseTimer = false
+    real _pauseTime = 5.5
+    string _name = "Earthquake"
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+        var center = gg_rct_Boss2VisionRange.getCenter()
+        caster.setPos(center)
+
+        new DummyCaster()
+            ..delay(5)
+            ..origin(caster.getPos())
+            ..castPoint(EARTHQUAKE_DUMMY_ID, 1, OrderId("earthquake"), caster.getPos())
+
+        SetBossAoeIndicator(caster.getPos(), 1100, 5.7)
+
+        var initialEnemies = caster.getEnemiesInRangeBoss(2000)
+
+        for u in initialEnemies
+            var newPos = center.angleTo(u.getPos()) + 180 .fromDeg()
+            Knockback3.add(u, 3000., newPos, 90 .fromDeg())
+
+                    
+        initialEnemies.destr()
+        initialEnemies = null
+
+        LinkedList<lightning> effectList = new LinkedList<lightning>()
+
+        doPeriodicallyCounted(1, 5) cb ->
+            flashEffect(Abilities.levelupcaster, caster, "origin")
+            caster.setAnimation("Attack Slam")
+
+        doPeriodicallyCounted(.2, 27) cb ->
+            var casterLoc = caster.getPos()
+            var enemies = caster.getEnemiesInRangeBoss(2000)
+            for light in effectList 
+                light.destr()
+                light = null
+
+            effectList.clear()
+            for u in enemies
+                var unitLoc = u.getPos()
+
+                effectList.add(addLightning("SPLK", false, casterLoc, unitLoc))
+            
+                enemies.destr()
+                enemies = null
+
+        doAfter(5.5) () ->
+            if caster.isAlive()
+                var enemies = caster.getEnemiesInRangeBoss(2000)
+
+                for u in enemies
+                    var newPos = center.angleTo(u.getPos()) + 180 .fromDeg()
+                    Knockback3.add(u, 4000., newPos, 90 .fromDeg())
+                
+                for light in effectList 
+                    light.destr()
+                
+                enemies.destr()
+                enemies = null
+
+        doAfter(5.7) () ->
+            if caster.isAlive()
+                var eff = AddSpecialEffect("HelGate.mdx", caster.getX(), caster.getY())
+                eff.setScale(6)
+                eff.destr()
+                effectList = null
+
+                var enemies2 = caster.getEnemiesInRangeBoss(1100)
+
+                for u in enemies2
+                    caster.damageTargetEx(u, 10, DamageTypeCustom.NONE, false)

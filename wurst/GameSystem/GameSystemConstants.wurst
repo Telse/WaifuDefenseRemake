@@ -1,0 +1,5 @@
+package GameSystemConstants
+import PlayerEvents
+
+public group EnemyUnits = CreateGroup()
+public var PlayerUnits = new LinkedList<unit>()

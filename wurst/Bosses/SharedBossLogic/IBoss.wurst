@@ -1,0 +1,10 @@
+package IBoss
+import BossState
+
+public interface IBoss
+
+    function castSpell()
+    
+    function GetBossUnit() returns unit
+
+    function GetRage() returns int

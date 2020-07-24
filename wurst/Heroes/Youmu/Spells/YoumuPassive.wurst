@@ -1,0 +1,38 @@
+package YoumuPassive
+import ClosureTimers
+import InitialHeroSpawn
+import YoumuFeel
+import ObjectIdGenerator
+import AbilityObjEditing
+import Icons
+import AbilityTooltipsHelpers
+import Knockback3
+import ChannelAbilityPreset
+import RegisterEvents
+
+public constant YOUMU_PASSIVE_ID = compiletime(ABIL_ID_GEN.next())
+
+@configurable public string SPELL_ICON 
+@configurable public string SPELL_NAME = "Myon"
+@configurable public string SPELL_TT_NORMAL = "Myon"
+@configurable public string SPELL_TT_EXTENDED  = "[Passive]|n|nMyon mimics all of Youmu's spell casts.|nMyon tries her hardest and will try to copy the spell multiple times!|nMyon has a chance to clone the spell additional times past the first.|n|nProc Chance: 20% + (2% of AGI)|nMax Procs: 5"
+
+@compiletime function createSpell()
+    new AbilityDefinitionBrewmasterDrunkenBrawler(YOUMU_PASSIVE_ID)
+        ..setHeroAbility(true)
+        ..setName(SPELL_NAME)
+        ..setButtonPositionNormalX(2)
+        ..setButtonPositionNormalY(1)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, GenerateSpellName(SPELL_TT_NORMAL))
+        ..setTooltipNormalExtended(1, GenerateSpellBody(SPELL_TT_EXTENDED))
+        ..setLevels(1)
+        ..presetCastRange(lvl -> 0)
+        ..presetIcon(Icons.bTNBreathOfFire)
+
+init
+    doAfter(2) ->
+        for u in rawHeroes
+            if u.getTypeId() == YOUMU_ID
+                AddSpecialEffectTargetUnitBJ("origin", u, "Youmu_Ghost.mdx")

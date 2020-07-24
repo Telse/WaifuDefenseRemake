@@ -1,0 +1,36 @@
+package IncreaseSpellDamage
+import ChannelAbilityPreset
+import ClosureEvents
+import PlayerStatsHashtable
+
+public constant INCREASESPELLDAMAGE_ID = compiletime(ABIL_ID_GEN.next())
+public string spellDamageHashKey = "spellDamage"
+
+@compiletime function CreateIncreaseSpellDamage()
+    new ChannelAbilityPreset(INCREASESPELLDAMAGE_ID, 1, true)
+        ..setHeroAbility(false)
+        ..setHotkeyNormal("S")
+        ..presetTargetTypes(Targettype.NONE)
+        ..setManaCost(1, 0)
+        ..presetCooldown(lvl -> .1)
+        ..setName("Increase Spell Damage")
+        ..setButtonPositionNormalX(2)
+        ..setButtonPositionNormalY(1)
+        ..setButtonPositionResearchX(2)
+        ..setButtonPositionResearchY(1)
+        ..setTooltipNormal(1, "Increase Spell Damage - [S]")
+        ..setTooltipNormalExtended(1, "Cost: 2 stat points |n|nIncreases spell damage by 5%.")
+        ..setIconNormal("ReplaceableTextures\\CommandButtons\\BTNStaffOfSilence.blp")
+
+init
+    registerSpellEffectEvent(INCREASESPELLDAMAGE_ID) ->
+        let currentPlayer = GetTriggerPlayer()
+        
+        if(GetTriggerPlayer().getLumber() >= 2)
+            currentPlayer.setLumber(currentPlayer.getLumber()-2)
+            var spellValue = playerStats.loadInt(GetPlayerId(currentPlayer), spellDamageHashKey.getHash())
+            spellValue+= 5
+            playerStats.saveInt(GetPlayerId(currentPlayer), spellDamageHashKey.getHash(), spellValue)
+            
+        else
+            currentPlayer.print("Insufficient Stat points!", 1.5)

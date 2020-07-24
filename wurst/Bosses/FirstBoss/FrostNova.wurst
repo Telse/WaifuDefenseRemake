@@ -1,0 +1,32 @@
+package FrostNova
+
+import ISpell
+import GroupUnitsInRange
+import DamageTargetExtensions
+import Abilities
+import BossHelpers
+
+public class FrostNova implements ISpell
+
+    bool _internalPauseTimer = false
+    real _pauseTime = 0
+    string _name = "Frost Nova"
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+        
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+        var enemies = caster.getEnemiesInRangeBoss(1000)
+
+        for u in enemies
+            caster.damageTargetEx(u, 50, DamageTypeCustom.SPELL, false)
+            flashEffect(Abilities.frostNovaTarget, u.getPos())
+
+        enemies.destr()
+        enemies =null

@@ -1,0 +1,31 @@
+package IncreaseStrength
+import ChannelAbilityPreset
+import ClosureEvents
+
+public constant INCREASESTRENGTH_ID = compiletime(ABIL_ID_GEN.next())
+
+@compiletime function CreateIncreaseStrength()
+    new ChannelAbilityPreset(INCREASESTRENGTH_ID, 1, true)
+        ..setHeroAbility(false)
+        ..setHotkeyNormal("Q")
+        ..presetTargetTypes(Targettype.NONE)
+        ..setManaCost(1, 0)
+        ..presetCooldown(lvl -> .1)
+        ..setName("Increase Strength")
+        ..setButtonPositionNormalX(0)
+        ..setButtonPositionNormalY(0)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchY(0)
+        ..setTooltipNormal(1, "Increase Strength - [Q]")
+        ..setTooltipNormalExtended(1, "Cost: 1 stat point |n|nIncreases Strength by 1.")
+        ..setIconNormal("UI\\Widgets\\Console\\Human\\infocard-heroattributes-str.blp")
+init   
+    registerSpellEffectEvent(INCREASESTRENGTH_ID) ->
+        let tp = GetTriggerPlayer()
+        var u = GetTriggerUnit()
+
+        if(tp.getLumber() >= 1)
+            tp.setLumber(tp.getLumber()-1)
+            u.addStr(1)
+        else
+            tp.print("Insufficient Stat points!", 1.5)

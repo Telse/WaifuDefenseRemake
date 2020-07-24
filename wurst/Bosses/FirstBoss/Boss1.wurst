@@ -1,0 +1,172 @@
+package Boss1
+import IBoss
+import BossState
+import ObjectIdGenerator
+import UnitIds
+import AbilityObjEditing
+import Icons
+import Abilities
+import GroupUnitsInRange
+import ClosureTimers
+import PlayerEvents
+import EnemyDeath
+import ISpell
+import FrostNova
+import MultipleFrostNovas
+import FrozenBlades
+import FrostZigZagPattern
+import FrozenSpiral
+import FrozenWaves
+import BossHelpers
+import FrozenCoffin
+import Whiteout
+import DreamsOfIce
+
+public constant BOSS_1_ID = compiletime(HERO_ID_GEN.next())
+
+@compiletime function CreateBoss1()
+    new UnitDefinition(BOSS_1_ID, UnitIds.lich)
+    ..setName("First Boss")
+    ..setIconGameInterface(Icons.bTNHeroLich)
+    ..setModelFile("Monster (129).mdx")
+    ..setMovementType(MovementType.Foot)
+    ..setRace(Race.Human)
+    ..setSpeedBase(350)
+    ..setManaInitialAmount(20)
+    ..setManaMaximum(100)
+    ..setManaRegeneration(0)
+    ..setShadowImageCenterX(0)
+    ..setShadowImageCenterY(0)
+    ..setShadowImageUnit("")
+    ..setShadowImageHeight(0)
+    ..setShadowImageWidth(0)
+    ..setCollisionSize(64)
+    ..setFoodCost(0)
+    ..setSightRadiusDay(0)
+    ..setSightRadiusNight(0)
+    ..setScalingValue(2)
+    ..setHitPointsMaximumBase(5000)
+    ..setAttacksEnabled(1)
+    ..setAttack1Range(500)
+    ..setAttack1ProjectileArt(Abilities.frostNovaTarget)
+    ..setAttack1DamageBase(40)
+    ..setAttack1CooldownTime(1)
+    ..setAcquisitionRange(1500)
+    ..setAttack1WeaponType(WeaponType.Artillery)
+    ..setAttack1AreaofEffectFullDamage(25)
+    ..setAttack1AreaofEffectMediumDamage(150)
+    ..setAttack1AreaofEffectSmallDamage(250)
+    ..setAttack1AreaofEffectTargets("enemies")
+
+public class Boss1 implements IBoss
+
+    LinkedList<ISpell> BasicSpells = new LinkedList<ISpell>()
+
+    LinkedList<ISpell> AdvancedSpells = new LinkedList<ISpell>()
+
+    LinkedList<ISpell> UltimateSpell = new LinkedList<ISpell>()
+
+    unit _bossUnit
+    BossState _currentState = BossState.Basic
+    int _rage = 1
+    
+    construct()
+        BasicSpells
+            ..add(new FrostNova())
+            ..add(new MultipleFrostNovas())
+            ..add(new FrozenCoffin())
+
+        AdvancedSpells
+            ..add(new FrozenBlades())
+            ..add(new FrozenSpiral())
+            ..add(new FrozenWaves())
+            ..add(new Whiteout())
+
+        UltimateSpell
+            ..add(new DreamsOfIce())
+
+        _bossUnit = CreateEnemyUnit(
+                        BOSS_1_ID , 
+                        gg_rct_Boss1Spawn.getCenter(), 
+                        0 .fromDeg())
+
+    function GetBossUnit() returns unit
+        return _bossUnit
+
+    function GetRage() returns int
+        return _rage
+
+    override function castSpell()
+        if(_bossUnit.isAlive() and _bossUnit.isPaused() == false)
+
+            AddRageBasedOnBossHp()
+            SetBossStatus()
+
+            switch _currentState
+                case Basic
+                    PrepareSpells(BasicSpells)
+                    _rage += 10
+
+                case Advanced
+                    PrepareSpells(AdvancedSpells)
+                    _rage += 10
+
+                case Ultimate
+                    PrepareSpells(UltimateSpell)
+                    _rage = 1
+
+    function PrepareSpells(LinkedList<ISpell> spellList)
+        var enemies = _bossUnit.getEnemiesInRange(_bossUnit, 1500)
+
+        if enemies.isEmpty() == false
+            var spell = spellList.get(GetRandomInt(0, spellList.size()-1))
+
+            SetBossSpellInfo(_bossUnit, spell.GetName())
+
+            spell.Cast(_bossUnit)
+            Log.info("First boss casting a spell. List size: " +  spellList.size().toString())
+
+            SetPauseTime(spell)
+
+        enemies.clear()
+        enemies.destr()
+        enemies = null
+
+    function SetPauseTime(ISpell spell)
+        
+        if(spell.GetPauseTime() > 0 and spell.HasPauseLogic() == false)
+            _bossUnit.pause()
+            
+            doAfter(spell.GetPauseTime()) () ->
+                _bossUnit.unpause()
+
+        else if(spell.GetPauseTime() > 0 and spell.HasPauseLogic() == true)
+            _bossUnit.pause()
+
+    function SetBossStatus()
+        if(_rage < 50)
+            _currentState = BossState.Basic
+
+        if _rage >= 50 and _rage < 100
+            _currentState = BossState.Advanced
+
+        if _rage >= 100
+            _currentState = BossState.Ultimate
+
+    function AddRageBasedOnBossHp()
+        if _bossUnit.getHP() == 0
+            return
+
+        var bossPercentHp = _bossUnit.getHP() / _bossUnit.getMaxHP()
+
+        if bossPercentHp <= .25
+            _rage += 15
+            return
+            
+        if bossPercentHp <= .50
+            _rage += 10
+            return
+
+        if bossPercentHp <= .75
+            _rage += 5
+            return

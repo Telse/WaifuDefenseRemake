@@ -1,0 +1,9 @@
+package UiSelectionConstants
+import LinkedList
+import Bar
+import UnitSelectionData
+
+public LinkedList<UnitSelectionData> PLAYER_UNIT_SELECTION = new LinkedList<UnitSelectionData>()
+
+public Bar HpBar
+public Bar ManaBar

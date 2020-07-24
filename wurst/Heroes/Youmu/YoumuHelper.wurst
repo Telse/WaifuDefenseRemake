@@ -1,0 +1,20 @@
+package YoumuHelper
+
+int baseChance = 20
+
+public function CalculateMultiCasts(int agility) returns int
+    int procs = 0
+    real chance = baseChance + agility*.02
+    bool procced = true
+
+    while procced == true
+        real randomNumber = GetRandomReal(0, 100)
+        if randomNumber <= chance
+            procs++
+        else 
+            procced = false
+
+        if procs >= 4
+            procced = false
+
+    return procs

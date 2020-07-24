@@ -1,0 +1,92 @@
+package SetButtonPositions
+
+import ClosureTimers
+
+framehandle moveButton
+framehandle stopButton
+framehandle attackButton
+
+framehandle passive
+framehandle qButton
+framehandle wButton
+framehandle eButton
+framehandle rButton
+
+framehandle learnButton
+
+public function SetHeroSpellButtonScheme()
+    framehandle fh
+    for int x = 0 to 5
+        fh = BlzGetFrameByName("CommandButton_" + x.toString(), 0)
+        fh.show()
+
+        fh.clearAllPoints()
+        fh.setSize(.02, .02)
+        fh.setAbsPoint(FRAMEPOINT_BOTTOM , .32 + x * .02, .10)
+
+
+    int y = 0
+    for int x = 6 to 11
+        fh = BlzGetFrameByName("CommandButton_" + x.toString(), 0)
+        fh.clearAllPoints()
+        fh.setSize(.03, .03)
+        fh.show()
+
+        if x != 7
+            fh.setAbsPoint(FRAMEPOINT_BOTTOM , .326 + y*.034, .05)
+            y++
+        else
+            fh.setAbsPoint(FRAMEPOINT_BOTTOM , .495, .05)
+
+public function SetMerchantSpellButtonScheme()
+    framehandle fh
+    for int x = 0 to 5
+        fh = BlzGetFrameByName("CommandButton_" + x.toString(), 0)
+        fh.show()
+
+        fh.clearAllPoints()
+        fh.setSize(.02, .02)
+        fh.setAbsPoint(FRAMEPOINT_BOTTOM , .32 + x * .02, .10)
+
+
+    int y = 0
+    for int x = 6 to 11
+        fh = BlzGetFrameByName("CommandButton_" + x.toString(), 0)
+        fh.clearAllPoints()
+        fh.setSize(.03, .03)
+        fh.show()
+
+        if x != 7
+            fh.setAbsPoint(FRAMEPOINT_BOTTOM , .326 + y*.034, .05)
+            y++
+        else
+            fh.setAbsPoint(FRAMEPOINT_BOTTOM , .495, .05)
+
+public function ClearSpellButtonScheme()
+
+    framehandle fh
+    for int x = 0 to 5
+        fh = BlzGetFrameByName("CommandButton_" + x.toString(), 0)
+        fh.hide()
+
+    int y = 0
+    for int x = 6 to 11
+        fh = BlzGetFrameByName("CommandButton_" + x.toString(), 0)
+        fh.hide()
+
+init
+    doAfter(.2) ->
+        Log.info("Setting spell button positions.")
+        moveButton = BlzGetFrameByName("CommandButton_0", 0)
+        stopButton = BlzGetFrameByName("CommandButton_1", 0)
+        attackButton = BlzGetFrameByName("CommandButton_3", 0)
+
+        passive = BlzGetFrameByName("CommandButton_6", 0)
+        qButton = BlzGetFrameByName("CommandButton_8", 0)
+        wButton = BlzGetFrameByName("CommandButton_9", 0)
+        eButton = BlzGetFrameByName("CommandButton_10", 0)
+        rButton = BlzGetFrameByName("CommandButton_11", 0)
+
+        learnButton = BlzGetFrameByName("CommandButton_7", 0)
+        SetHeroSpellButtonScheme()
+

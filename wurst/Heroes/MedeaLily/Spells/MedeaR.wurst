@@ -1,0 +1,105 @@
+package MedeaR
+import DamageTargetExtensions
+import ChannelAbilityPreset
+import IBaseSpellConfigurable
+import ClosureEvents
+import ClosureTimers
+import GameSystemConstants
+import AbilityTooltipsHelpers
+
+
+@configurable public real BASE_DAMAGE = .05
+@configurable public real BONUS_DAMAGE 
+@configurable public DamageTypeCustom DAMAGE_TYPE = DamageTypeCustom.SPELL
+              
+@configurable public string SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Orc\\Orcblood\\BattrollBlood.mdl"
+@configurable public string SECONDARY_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\BloodElfSpellThiefBlood.mdl"
+@configurable public string THIRD_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl"
+@configurable public string FOURTH_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\HumanBloodLarge0.mdl"
+@configurable public string FIFTH_SPELL_EFFECT_PATH = "baojiang.mdx"
+
+@configurable public string BONUS_EFFECT_PATH 
+@configurable public real SPELL_EFFECT_DURATION
+@configurable public real SPELL_RADIUS = 75 
+
+@configurable public string SPELL_ICON 
+@configurable public string SPELL_NAME 
+@configurable public string SPELL_TT_NORMAL = "Pain Breaker - All Flaws Must be Repaired"
+@configurable public string SPELL_TT_EXTENDED  = "[Active]|n|nAfter a long channel, Medea restores all allies HP/Mana and resurrects all dead heroes.|n|nCast Time: 4s|nCooldown: 50s"
+              
+@configurable public real BUFF_DURATION = 15
+@configurable public string BUFF_EFFECT_PATH 
+              
+@configurable public string BUFF_NAME 
+@configurable public string BUFF_TT 
+              
+@configurable public real INT_MULTIPLIER = .01
+@configurable public real STRENGTH_MULTIPLIER = 0
+@configurable public real AGI_MULTIPLIER = 0
+
+public constant MEDEA_R_ID = compiletime(ABIL_ID_GEN.next())
+int orderId = 852486
+
+@compiletime function CreateMedeaE()
+    new ChannelAbilityPreset(MEDEA_R_ID, 5, true)
+        ..setHeroAbility(true)
+        ..presetHotkey("R")
+        ..setName("Medea R")
+        ..setButtonPositionNormalX(3)
+        ..setButtonPositionNormalY(2)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, GenerateSpellName(SPELL_TT_NORMAL))
+        ..setTooltipNormalExtended(1, GenerateSpellBody(SPELL_TT_EXTENDED))
+        ..presetTargetTypes(Targettype.NONE)
+        ..setLevels(5)
+        ..presetManaCost(lvl -> 0)
+        ..presetCooldown(lvl -> 5)
+        ..presetIcon(Icons.bTNBreathOfFire)
+        ..presetCastRange(lvl -> 700.0)
+        ..presetFollowThroughTime(lvl -> 4)    
+
+init
+    registerSpellEffectEvent(MEDEA_R_ID) ->
+        var tU = GetTriggerUnit()
+        var tUPos = tU.getPos()
+
+        doPeriodicallyCounted(.1, 1) cb ->
+            var startPos = tUPos
+            var distance = 50.0
+            var initialAngle = 10.0
+
+            doPeriodicallyCounted(.1, 30) cb ->
+            
+                var order = tU.getCurrentOrder()
+                if(tU.isAlive() and order == orderId)
+                    var newPos = startPos.polarOffset(initialAngle .fromDeg(), distance)
+                    flashEffect("Divine Edict.mdx", newPos)
+
+                    newPos = startPos.polarOffset((initialAngle+90) .fromDeg(), distance)
+                    flashEffect("Divine Edict.mdx", newPos)
+
+                    newPos = startPos.polarOffset((initialAngle+180) .fromDeg(), distance)
+                    flashEffect("Divine Edict.mdx", newPos)
+
+                    newPos = startPos.polarOffset((initialAngle+270) .fromDeg(), distance)
+                    flashEffect("Divine Edict.mdx", newPos)
+
+                    initialAngle += 10
+                    distance += 15
+
+
+        doAfter(4) -> 
+            var order = tU.getCurrentOrder()
+            if(tU.isAlive() and order == orderId)
+                for u in PlayerUnits
+                    if u.isAlive() == false
+                        u.revive(tUPos, true)
+                        u.setHP(u.getMaxHP())
+                        u.setMana(u.getMaxMana())
+                    else
+                        u.setHP(u.getMaxHP())
+                        u.setMana(u.getMaxMana())
+        
+            
+

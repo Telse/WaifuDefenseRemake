@@ -1,0 +1,46 @@
+package ClearWc3UI
+import ClosureTimers
+
+init
+    Log.info("Clearing UI")
+    hideOriginFrames(true)
+    let gameUI = getOriginFrame(ORIGIN_FRAME_WORLD_FRAME, 0)
+    gameUI.setScale(.01)
+
+    let chat = getOriginFrame(ORIGIN_FRAME_CHAT_MSG)
+    chat.show()
+
+    BlzFrameSetAllPoints(BlzGetOriginFrame(ORIGIN_FRAME_WORLD_FRAME,0),BlzGetOriginFrame(ORIGIN_FRAME_GAME_UI,0))
+    BlzFrameSetAllPoints(BlzGetOriginFrame(ORIGIN_FRAME_WORLD_FRAME,0),BlzGetOriginFrame(ORIGIN_FRAME_GAME_UI,0))
+    BlzFrameSetAllPoints(BlzGetFrameByName("ConsoleUI", 0), BlzGetOriginFrame(ORIGIN_FRAME_GAME_UI, 0))
+    BlzFrameSetPoint(BlzGetFrameByName("ConsoleUI", 0), FRAMEPOINT_BOTTOM, BlzGetOriginFrame(ORIGIN_FRAME_GAME_UI, 0), FRAMEPOINT_BOTTOM, -1, -1)
+    BlzFrameSetVisible(BlzGetFrameByName("ResourceBarFrame", 0), false)
+
+    SetHeroPortraits()
+    ShowItems()
+    LoadTocs()
+
+function ShowItems()
+    for int x = 0 to 5
+        var fh = BlzGetFrameByName("InventoryButton_" + x.toString(), 0)
+
+        fh.getParent().show()
+        fh.getParent().getParent().show()
+
+        fh.show()
+        fh.setSize(.015, .015)
+        fh.clearAllPoints()
+        fh.setScale(.6)
+        fh.setAbsPoint(FRAMEPOINT_BOTTOM, .315 + x*.02, .135)
+
+function SetHeroPortraits()
+    // var fh = getOriginFrame(ORIGIN_FRAME_PORTRAIT, 0)
+    // fh.clearAllPoints()
+    // fh.show()
+    // fh.setScale(1)
+    // BlzFrameSetAbsPoint(fh, FRAMEPOINT_BOTTOM, .3, .02)
+
+function LoadTocs()
+    BlzLoadTOCFile("war3mapImported\\Bar.toc")
+    BlzLoadTOCFile("war3mapImported\\Backdrop.toc")
+    BlzLoadTOCFile("war3mapImported\\Damageframe.toc")

@@ -1,0 +1,55 @@
+package FrozenBlades
+import ISpell
+import BossHelpers
+import ClosureTimers
+import Abilities
+import GroupUnitsInRange
+import DamageTargetExtensions
+
+public class FrozenBlades implements ISpell
+
+    bool _internalPauseTimer = false
+    real _pauseTime = 10.1
+    string _name = "Frozen Blades"
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+        var initialPos = caster.getPos()
+        
+        doPeriodicallyCounted(2, 3) cb ->
+            var startPos = initialPos
+            var distance = 50.0
+            var initialAngle = 10.0
+            bool forwards = true
+        
+            doPeriodicallyCounted(.1, 32) cb ->
+                for int i = 0 to 9
+                    real angle = i*40.0
+                    var newPos = startPos.polarOffset(angle .fromDeg(), distance)
+                    flashEffect(Abilities.frostNovaTarget, newPos)
+
+                    var enemies = newPos.getEnemiesInRange(newPos, caster, 50)
+
+                    for u in enemies
+                        caster.damageTargetEx(u, 10, DamageTypeCustom.SPELL, false)
+
+                    enemies.destr()
+                    enemies =null
+            
+                if(distance >= 800)
+                    forwards = false
+            
+                if(distance < 800) and forwards == true
+                    distance += 50
+
+                else if forwards == false
+                    forwards = false
+                    distance -= 50

@@ -1,0 +1,37 @@
+package InitialShopsSpawn
+import ClosureTimers
+import UnitObjEditing
+import MissionItems
+import ObjectIds
+import ObjectIdGenerator
+import LinkedList
+
+public constant MISSION_ID_LIST = new LinkedList<int>()
+                                        ..add(M1_ITEM_ID)
+                                        ..add(M2_ITEM_ID)
+                                        ..add(M3_ITEM_ID)
+
+public constant SHOP_ID = compiletime(UNIT_ID_GEN.next())
+
+@compiletime function createShopUnit()
+    new BuildingDefinition(SHOP_ID, 'nmrk')
+    ..setName("Market")
+    ..setIconGameInterface("ReplaceableTextures\\CommandButtons\\BTNElvenFarm.blp")
+    ..setIconScoreScreen("")
+    ..setModelFile("heromedeialily.mdx")
+    ..setMovementType(MovementType.Foot)
+    ..setRace(Race.Human)
+    ..setNormalAbilities("Aneu, Asid, Avul, Asud, Apit")
+    ..setSpeedBase(0)
+    ..setCollisionSize(32)
+    ..setRace(Race.Human)
+    ..setSightRadiusDay(1000)
+    ..setSightRadiusNight(1000)
+    ..setPropulsionWindowdegrees(1.0)
+    ..setUnitClassification("_")
+    ..setItemsSold(commaList(M1_ITEM_ID, M2_ITEM_ID, M3_ITEM_ID))
+
+init
+    doAfter(.2) ->
+        createUnit(players[22], SHOP_ID, gg_rct_ShopSpawn.getCenter(), 270 .fromDeg())
+        

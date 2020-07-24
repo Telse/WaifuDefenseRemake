@@ -1,0 +1,17 @@
+package UnitSelectionData
+
+public class UnitSelectionData
+
+    unit u
+    player play
+
+    construct(
+        unit _u, 
+        player _play)
+
+        u = _u
+        play = _play
+
+    function destr()
+        u = null
+        play = null

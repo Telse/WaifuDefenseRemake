@@ -1,0 +1,39 @@
+package SakuyaR
+import ClosureEvents
+import SakuyaRObjects
+import GroupUnitsInRange
+import SakuyaRConstants
+import ClosureTimers
+import SakuyaKnivesInitialHash
+
+public boolean SakuyaRActive = false
+public group SakuyaRGroup = CreateGroup()
+public group SakuyaRPausedUnits = CreateGroup()
+
+
+init
+    registerSpellEffectEvent(SAKUYAR_ID) ->
+
+        var tU = GetTriggerUnit()
+        SakuyaRPausedUnits = tU.getEnemiesInRange(tU, 3000)
+        var eff = AddSpecialEffect(SPELL_EFFECT_PATH, tU.getX(), tU.getY())
+        SakuyaRActive = true
+
+        PauseUnit(tU, true)
+        doAfter(.1) ->
+            tU.setAnimation(16)
+
+        doAfter(1.5) ->
+            PauseUnit(tU, false)
+            for u in SakuyaRPausedUnits
+                u.pause()
+
+        doAfter(BUFF_DURATION + 1.6) ->
+            SakuyaRActive = false
+            eff.destr()
+            
+            for u in SakuyaRPausedUnits
+                u.unpause()
+            
+            for dummy in SakuyaRGroup
+                AddToSakuyaKnivesInitialHashUnitGroup(dummy)

@@ -1,0 +1,31 @@
+package SeinQConstants
+import DamageTargetExtensions
+
+@configurable public real BASE_DAMAGE = 50
+@configurable public real BONUS_DAMAGE 
+@configurable public DamageTypeCustom DAMAGE_TYPE = DamageTypeCustom.SPELL
+              
+@configurable public string SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Orc\\Orcblood\\BattrollBlood.mdl"
+@configurable public string SECONDARY_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\BloodElfSpellThiefBlood.mdl"
+@configurable public string THIRD_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl"
+@configurable public string FOURTH_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\HumanBloodLarge0.mdl"
+@configurable public string FIFTH_SPELL_EFFECT_PATH = "baojiang.mdx"
+
+@configurable public string BONUS_EFFECT_PATH 
+@configurable public real SPELL_EFFECT_DURATION
+@configurable public real SPELL_RADIUS = 75 
+@configurable public real SPELL_CAST_RANGE = 700
+
+@configurable public string SPELL_ICON 
+@configurable public string SPELL_NAME 
+@configurable public string SPELL_TT_NORMAL = "Mana Barrier"
+@configurable public string SPELL_TT_EXTENDED  = "[Active]|n|nSein creates a barrier that protects her from damage for a short period of time. If this barrier is destroyed, she'll recover 50% of her mana.|n|nShield Amount: 300 + Level*50 + INT*2 + STR*1|nDuration: 8s|nCooldown: 12s"
+@configurable public real BUFF_DURATION = 4
+@configurable public string BUFF_EFFECT_PATH 
+              
+@configurable public string BUFF_NAME 
+@configurable public string BUFF_TT 
+              
+@configurable public real INT_MULTIPLIER = 3
+@configurable public real STRENGTH_MULTIPLIER = 2
+@configurable public real AGI_MULTIPLIER = 0

@@ -1,0 +1,172 @@
+package BossHelpers
+import FloatingDamage
+import ClosureTimers
+import Assets
+import PlayerEvents
+import GroupUnitsInRange
+import Colors
+
+public function SetBossSpellInfo(
+    unit u, 
+    string spellName)
+
+    ShowGeneralText(u, null, spellName)
+
+    doPeriodicallyCounted(.1, 1) cb ->
+        flashEffect(Abilities.levelupcaster, u, "origin")
+
+public function SetBossAoeIndicator(
+    vec2 pos,
+    int range,
+    real duration)
+
+    //Model's base aoe size is 175
+    var eff = AddSpecialEffect("t_bossring.mdx", pos.x, pos.y)
+    eff.setScale(range/175)
+
+    doAfter(duration) () ->
+        eff.setZ(-500.0)
+        eff.destr()
+        eff = null
+
+public function SetBossAoeIndicatorColored(
+    vec2 pos,
+    int range,
+    real duration,
+    int red,
+    int green,
+    int blue)
+
+    //Model's base aoe size is 175
+    var eff = AddSpecialEffect("t_bossring2.mdx", pos.x, pos.y)
+    eff.setScale(range/175)
+    eff.setColor(red, green, blue)
+    
+    doAfter(duration) () ->
+        eff.setZ(-500.0)
+        eff.destr()
+        eff = null
+
+
+public function DrawAoeTester(
+    vec2 pos,
+    real range,
+    real duration)
+
+    var effList = new LinkedList<effect>
+    for int x = 0 to 36
+        var temp = pos.polarOffset((x*10) .fromRad(), range)
+        effList.add(AddSpecialEffect("Abilities\\Weapons\\PriestMissile\\PriestMissile.mdl", temp.x, temp.y))
+
+    doAfter(duration) () ->
+        for eff in effList
+            eff.destr()
+            eff =null
+        effList.clear()
+        effList = null
+
+
+
+public function SetBossLineIndicators(vec2 startPos,
+    real radians, 
+    real range,
+    real width,
+    real duration)
+    
+    real sfxWidth = 30
+    real halfWidth = width/2
+    real currentLeft = 0
+    real currentRight = 0
+
+    SetBossLineIndicator(startPos, radians, range, duration)
+
+    while currentLeft < halfWidth
+        var atTheEnd = currentLeft + sfxWidth > halfWidth
+        var targetPos = startPos.polarOffset((radians + 1.5708).fromRad(), 
+                atTheEnd ? (halfWidth - sfxWidth) 
+                         : currentLeft)
+
+        SetBossLineIndicator(targetPos, radians, range, duration)
+        currentLeft += sfxWidth
+
+    while currentRight < halfWidth
+        var atTheEnd = currentRight + sfxWidth > halfWidth
+        var targetPos = startPos.polarOffset((radians + -1.5708).fromRad(), 
+                atTheEnd ? (halfWidth - sfxWidth) 
+                         : currentRight)
+
+        SetBossLineIndicator(targetPos, radians, range, duration)
+        currentRight += sfxWidth
+
+
+
+public function SetBossLineIndicator(vec2 pos,
+    real radians, 
+    real range,
+    real duration)
+
+    var effList = new LinkedList<effect>()
+    int sfxLength = 383
+    real currentLength = 0
+
+    while currentLength < range
+        var atTheEnd = currentLength + sfxLength > range
+        var targetPos = pos.polarOffset(radians.fromRad(), 
+            atTheEnd ? (range - sfxLength) 
+                     : currentLength)
+        var eff = AddSpecialEffect("t_bossjinggaocf.mdx", targetPos.x, targetPos.y)
+        eff.setYaw(radians)
+        effList.add(eff)
+
+        currentLength += sfxLength
+
+    doAfter(duration) () ->
+        for eff in effList
+            eff.destr()
+            eff.setZ(-100.0)
+            eff =null
+        effList.clear()
+        effList = null
+
+
+public function DrawLineTester(
+    vec2 endPos,
+    real duration)
+
+    var eff = AddSpecialEffect("Abilities\\Weapons\\PriestMissile\\PriestMissile.mdl", endPos.x, endPos.y)
+
+    doAfter(duration) () ->
+        eff.setZ(-100.0)
+        eff.destr()
+        eff = null
+
+
+public function DrawLineWidthTester(
+    vec2 endPos,
+    real duration)
+
+    var effList = new LinkedList<effect>()
+
+    var angle = endPos.getAngle().degrees()
+    var left = endPos.polarOffset((angle + 90).fromDeg(), 30)
+    var right = endPos.polarOffset((angle - 90).fromDeg(), 30)
+
+    var eff = AddSpecialEffect("Abilities\\Weapons\\PriestMissile\\PriestMissile.mdl", endPos.x, endPos.y)
+    var eff2 = AddSpecialEffect("Abilities\\Weapons\\PriestMissile\\PriestMissile.mdl", left.x, left.y)
+    var eff3 = AddSpecialEffect("Abilities\\Weapons\\PriestMissile\\PriestMissile.mdl", right.x, right.y)
+
+    effList.add(eff)
+    effList.add(eff2)
+    effList.add(eff3)
+
+    doAfter(duration) () ->
+        for effec in effList
+            effec.destr()
+            effec.setZ(-100.0)
+            effec =null
+        effList.clear()
+        effList = null
+
+public function SetBossConeIndicator()
+
+        

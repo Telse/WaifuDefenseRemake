@@ -1,0 +1,44 @@
+package YoumuFeel
+
+import ObjectIdGenerator
+
+public constant YOUMU_ID = compiletime(HERO_ID_GEN.next())
+public constant YOUMU_GHOST_DUMMY_UNIT = compiletime(UNIT_ID_GEN.next())
+
+//Youmu's Feel:
+//
+//PAssive: Something to do with her ghost
+//
+//Based on CD4's Youmu
+//
+//
+//Old Youmu:
+//
+//
+//Q: Targetted blinkstrike that deals strx3 + agix7
+//
+//W: Summons ghost, ghost copies some spells unreliably
+//
+//E: Hit one target a fuckton of times, doubled with clone.
+//
+//R: Dash forward, leaving a bunch of sakura petals around everywhere dealing big damage.
+//
+//
+//
+//I want to try and make the ghost effect her passive.
+//
+//Perhaps a permanent ghost that double casts all her spells at a reduced amount of damage? Damage scaling increases with agi.
+//
+//Or maybe a chance to have the ghost double-cast?
+//
+//Or maybe a counter system that will increase by 1 on X event? That feels kind of boring. I'm kinda burnt out on counter-based systems.
+//
+//
+//
+//Q: Can stay the same, since it provides a gap closer with really nice damage.
+//
+//W: IDK YET.
+//
+//E: I really liked the old one, so that can stay too. Really nice when double-casted with ghost.
+//
+//R: I really liked this too, but have additional cross-shaped double-cast with ghost.

@@ -1,0 +1,96 @@
+package RemiliaW
+import ClosureTimers
+import ClosureEvents
+import HealUnit
+import SpellDamageCalculationExtensions
+import ObjectIdGenerator
+import ChannelAbilityPreset
+import Icons
+import DamageTargetExtensions
+import Objects
+import AbilityTooltipsHelpers
+
+@configurable public real BASE_HEAL = 200
+@configurable public real BONUS_DAMAGE 
+@configurable public DamageTypeCustom DAMAGE_TYPE = DamageTypeCustom.SPELL        
+@configurable public string SPELL_EFFECT_PATH = Objects.undeadDissipate
+@configurable public string BONUS_EFFECT_PATH 
+@configurable public real SPELL_EFFECT_DURATION
+@configurable public real SPELL_RADIUS = 75      
+@configurable public string SPELL_ICON 
+@configurable public string SPELL_NAME 
+@configurable public string SPELL_TT_NORMAL = "God Art 'Vampire Illusion' [W]"
+@configurable public string SPELL_TT_EXTENDED  = "[Active]|n|nOn use, Remilia becomes invulnerable for a short period and slowly restores her HP and Mana.|n|nSpecial: Remilia goes invulnerable for 3s.|nHP/Mana Restored: 200*Level + INT*10 + STR*10|nCooldown: 20s"        
+@configurable public real BUFF_DURATION = 4
+@configurable public string BUFF_EFFECT_PATH      
+@configurable public string BUFF_NAME 
+@configurable public string BUFF_TT       
+@configurable public real INT_MULTIPLIER = 10
+@configurable public real STRENGTH_MULTIPLIER = 10
+@configurable public real AGI_MULTIPLIER = 0
+
+public constant REMILIAW_ID = compiletime(ABIL_ID_GEN.next())
+
+@compiletime function CreateRemiliaW()
+    new ChannelAbilityPreset(REMILIAW_ID, 1, true)
+    ..setHeroAbility(true)
+    ..presetHotkey("W")
+    ..setName("Remilia W")
+    ..setButtonPositionNormalX(1)
+    ..setButtonPositionNormalY(2)
+    ..setButtonPositionResearchX(0)
+    ..setButtonPositionResearchX(0)
+    ..setTooltipNormal(1, GenerateSpellName(SPELL_TT_NORMAL))
+    ..setTooltipNormalExtended(1, GenerateSpellBody(SPELL_TT_EXTENDED))
+    ..presetTargetTypes(Targettype.NONE)
+    ..setLevels(5)
+    ..presetManaCost(lvl -> 0)
+    ..presetCooldown(lvl -> 20)
+    ..presetIcon(Icons.bTNBreathOfFire)
+    ..setAnimationNames("stand")
+
+function DisplaySpellEffects(vec2 currentPos)
+
+    flashEffect(SPELL_EFFECT_PATH, currentPos)
+    
+    for int i = 0 to 5
+        var tempPos = currentPos 
+        tempPos.x += i*20
+        flashEffect(SPELL_EFFECT_PATH, tempPos)
+        var tempPos2 = currentPos
+        tempPos2.y += i*20
+        flashEffect(SPELL_EFFECT_PATH, tempPos2)
+
+    for int i = 0 to 5
+        var tempPos = currentPos 
+        tempPos.x -= i*20
+        flashEffect(SPELL_EFFECT_PATH, tempPos)
+        var tempPos2 = currentPos
+        tempPos2.y -= i*20
+        flashEffect(SPELL_EFFECT_PATH, tempPos2)
+
+init
+    registerSpellEffectEvent(REMILIAW_ID) ->
+        var tU =GetTriggerUnit()
+
+        tU.setVertexColor(0, 0, 0, 100)
+        DisplaySpellEffects(tU.getPos())
+        tU.setInvulnerable(true)
+
+        var healAmount = tU.calculateSpellDamage(STRENGTH_MULTIPLIER,
+        AGI_MULTIPLIER,
+        INT_MULTIPLIER,
+        BASE_HEAL,
+        REMILIAW_ID)
+
+        tU.healUnit(tU, healAmount, tU)
+        tU.addMana(healAmount)
+
+        doPeriodicallyCounted(.5, 6) CallbackCounted cb ->
+            tU.healUnit(tU, (healAmount/6), tU)
+            tU.addMana(healAmount/6)
+
+        doAfter(3) ->
+            DisplaySpellEffects(tU.getPos())
+            tU.setInvulnerable(false)
+            tU.setVertexColor(255, 255, 255, 100)

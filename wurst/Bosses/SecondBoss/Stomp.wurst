@@ -1,0 +1,36 @@
+package Stomp
+import ISpell
+import BossHelpers
+import ClosureTimers
+import GroupUnitsInRange
+import Abilities
+import DamageTargetExtensions
+
+public class Stomp implements ISpell
+
+    bool _internalPauseTimer = false
+    real _pauseTime = 2.25
+    string _name = "Stomp"
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+        AddSpecialEffectTargetUnitBJ("origin", caster, Abilities.levelupcaster).destr()
+        SetBossAoeIndicator(caster.getPos(), 500, 2)
+
+        doAfter(2) () ->
+
+            Log.info("Aoe stomp")
+            var enemies = caster.getEnemiesInRangeBoss(500)
+            AddSpecialEffectTargetUnitBJ("origin", caster, Abilities.thunderclapCaster).destr()
+            
+            for u in enemies
+                caster.setAnimation("Attack Slam")
+                caster.damageTargetEx(u, 30, DamageTypeCustom.SPELL, false)

@@ -1,0 +1,60 @@
+package TestLineIndicatorSpell
+import ObjectIdGenerator
+import ChannelAbilityPreset
+import Icons
+import RegisterEvents
+import EventHelper
+import BossHelpers
+import DamageTargetExtensions
+import ClosureTimers
+import GroupUnitsInRange
+
+public constant TEST_LINE_SPELL_ID = compiletime(ABIL_ID_GEN.next())
+public int Range = 50
+
+
+@compiletime function CreateTestAoeSpell()
+    new ChannelAbilityPreset(TEST_LINE_SPELL_ID, 5, true)
+        ..setHeroAbility(false)
+        ..presetHotkey("Z")
+        ..setName("TEST AOE")
+        ..setButtonPositionNormalX(0)
+        ..setButtonPositionNormalY(2)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, "Test aoe line")
+        ..setTooltipNormalExtended(1, "Test Aoe line")
+        ..presetTargetTypes(Targettype.POINT)
+        ..setLevels(1)
+        ..presetManaCost(lvl -> 0)
+        ..presetCooldown(lvl -> 2)
+        ..presetIcon(Icons.bTNBreathOfFire)
+
+init  
+    registerSpellEffectEvent(TEST_LINE_SPELL_ID) ->
+        var triggerUnit = GetTriggerUnit()
+        var target = getSpellTargetPos()
+
+        var angle = triggerUnit.getPos().angleTo(target).radians()
+        var target2 = target.polarOffset((angle + 1.5708).fromRad(), 70)
+        var target3 = target.polarOffset((angle - 1.5708).fromRad(), 70)
+
+
+
+        var angle2 = triggerUnit.getPos().angleTo(target)
+
+        SetBossLineIndicator(target, angle, 700, 16)
+        SetBossLineIndicator(target2, angle, 700, 16)
+        SetBossLineIndicator(target3, angle, 700, 16)
+
+        doPeriodicallyCounted(.2, 80) cb ->
+            var enemies = target.getAlliesInLine(angle2.degrees(), triggerUnit, 700)
+            enemies.addGroup(target2.getAlliesInLine(angle2.degrees(), triggerUnit, 700))
+            enemies.addGroup(target3.getAlliesInLine(angle2.degrees(), triggerUnit, 700))
+
+            for u in enemies
+                triggerUnit.damageTargetEx(u, 1, DamageTypeCustom.NONE, false)
+
+            enemies.clear()
+            enemies.destr()
+            enemies = null

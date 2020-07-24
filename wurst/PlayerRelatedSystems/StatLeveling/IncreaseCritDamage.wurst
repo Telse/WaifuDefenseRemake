@@ -1,0 +1,37 @@
+package IncreaseCritDamage
+
+import ChannelAbilityPreset
+import ClosureEvents
+import PlayerStatsHashtable
+
+public constant INCREASECRITDAMAGE_ID = compiletime(ABIL_ID_GEN.next())
+public string critDamageHashKey = "critDamage"
+
+@compiletime function CreateIncreaseSpellDamage()
+    new ChannelAbilityPreset(INCREASECRITDAMAGE_ID, 1, true)
+        ..setHeroAbility(false)
+        ..setHotkeyNormal("A")
+        ..presetTargetTypes(Targettype.NONE)
+        ..setManaCost(1, 0)
+        ..presetCooldown(lvl -> .1)
+        ..setName("Increase Crit Chance")
+        ..setButtonPositionNormalX(1)
+        ..setButtonPositionNormalY(1)
+        ..setButtonPositionResearchX(1)
+        ..setButtonPositionResearchY(1)
+        ..setTooltipNormal(1, "Increases Crit Damage. - [A]")
+        ..setTooltipNormalExtended(1, "Cost: 2 stat points |n|nIncreases crit damage by 5%.")
+        ..setIconNormal("ReplaceableTextures\\CommandButtons\\BTNImpale.blp")
+
+init
+    registerSpellEffectEvent(INCREASECRITDAMAGE_ID) ->
+        let currentPlayer = GetTriggerPlayer()
+        
+        if(GetTriggerPlayer().getLumber() >= 2)
+            currentPlayer.setLumber(currentPlayer.getLumber()-2)
+            var critDamageValue = playerStats.loadInt(GetPlayerId(currentPlayer), critDamageHashKey.getHash())
+            critDamageValue+= 5
+            playerStats.saveInt(GetPlayerId(currentPlayer), critDamageHashKey.getHash(), critDamageValue)
+
+        else
+            currentPlayer.print("Insufficient Stat points!", 1.5)           

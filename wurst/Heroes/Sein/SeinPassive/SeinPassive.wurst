@@ -1,0 +1,9 @@
+package SeinPassive
+import Sein
+import DamageTargetExtensions
+
+
+public function SeinManaRestorePassive(unit target)
+    if(target.getTypeId() == SEIN_ID) 
+    and customDamageTypeMain != DamageTypeCustom.IGNORED
+        target.addMana(5)

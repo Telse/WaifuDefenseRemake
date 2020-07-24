@@ -1,0 +1,55 @@
+package EarthSpikes
+import ISpell
+import BossHelpers
+import ClosureTimers
+import Abilities
+import GroupUnitsInRange
+import DamageTargetExtensions
+
+public class EarthSpikes implements ISpell
+
+    bool _internalPauseTimer = false
+    real _pauseTime = 2.7
+    string _name = "Earth Spikes"
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+            
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+
+        var casterPos = caster.getPos()
+        real angle = 0
+
+        for int x = 0 to 12
+            SetBossLineIndicator(casterPos, angle, 900, 1.8)
+            angle+=.5
+
+        doAfter(1) ->
+            real distance = 300
+            caster.setAnimation("Attack Slam")
+
+            doPeriodicallyCounted(.05, 16) (CallbackCounted cb) ->
+                for int i = 0 to 12
+                    real innerAngle = i*.5
+                    var newPos = casterPos.polarOffset(innerAngle .fromRad(), distance)
+                    var eff = AddSpecialEffect("Abilities\\Spells\\Undead\\Impale\\ImpaleMissTarget.mdl", newPos.x, newPos.y)
+                    
+                    eff.setScale(.8)
+                    eff.destr()
+                    eff = null
+
+                    var enemies = newPos.getEnemiesInRange(newPos, caster, 40)
+
+                    for u in enemies
+                        caster.damageTargetEx(u, 40, DamageTypeCustom.SPELL, false)
+
+                    enemies.destr()
+                    enemies = null
+
+                distance+=50

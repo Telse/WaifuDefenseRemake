@@ -1,0 +1,31 @@
+package RemiliaETimer
+import RemiliaEHash
+
+function resolveRemiliaEHash()
+    var enumUnit = GetEnumUnit()
+    real tempDuration = LoadRealBJ(StringHashBJ("Duration"), GetHandleIdBJ(enumUnit), RemiliaEHash)
+    location newLoc = PolarProjectionBJ(GetUnitLoc(enumUnit), 100, GetUnitFacing(enumUnit))
+
+
+    if(tempDuration >= 0)
+        SetUnitX(enumUnit, GetLocationX(newLoc))
+        SetUnitY(enumUnit, GetLocationY(newLoc))
+        tempDuration -= .034
+        SaveRealBJ(tempDuration, StringHashBJ("Duration"), GetHandleIdBJ(enumUnit), RemiliaEHash)
+
+    else
+        KillUnit(enumUnit)
+        RemoveUnit(enumUnit)
+        GroupRemoveUnitSimple(enumUnit, RemiliaEUnitGroup)
+        FlushChildHashtableBJ(GetHandleIdBJ(enumUnit), RemiliaEHash)
+        
+    newLoc = null
+
+function actions()
+    ForGroup(RemiliaEUnitGroup, function resolveRemiliaEHash)
+
+init
+    trigger trg = CreateTrigger()
+    TriggerRegisterTimerEventPeriodic(trg, .034)
+    TriggerAddAction(trg, function actions)
+

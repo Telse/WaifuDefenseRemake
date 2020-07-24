@@ -1,0 +1,9 @@
+package HealUnit
+import DamageTables
+import FloatingDamage
+
+public function unit.healUnit(unit healer, real healAmount, unit healedUnit)
+    if(IsUnitDeadBJ(healedUnit) == false)
+        SetUnitState(healedUnit, UNIT_STATE_LIFE, GetUnitState(healedUnit, UNIT_STATE_LIFE) + healAmount)
+        TrackHealingDone(healer, healAmount, healedUnit)
+        ShowHealingText(healedUnit, healAmount.toInt().toString())

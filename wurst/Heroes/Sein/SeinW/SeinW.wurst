@@ -1,0 +1,32 @@
+package SeinW
+import ClosureTimers
+import ClosureEvents
+import SeinWObjects
+import GroupUnitsInRange
+import DamageTargetExtensions
+import SeinWConstants
+import SpellDamageCalculationExtensions
+import Abilities
+
+init
+    registerSpellEffectEvent(SEIN_W_ID) ->
+        var targetPos = getSpellTargetPos()
+        var tU = GetTriggerUnit()
+
+        doPeriodicallyCounted(.1, 20) cb ->
+            var enemies = tU.getEnemiesInRange(tU, 290)
+            real damage = tU.calculateSpellDamage(STRENGTH_MULTIPLIER,
+                                                  AGI_MULTIPLIER,
+                                                  INT_MULTIPLIER,
+                                                  BASE_DAMAGE,
+                                                  SEIN_W_ID)
+            var tickDamage = damage * .05
+            var eff = AddSpecialEffect(Abilities.markOfChaosTarget, tU.getX(), tU.getY())
+
+            eff.setScale(3.0)
+            eff.destr()
+
+            for u in enemies
+                tU.damageTargetEx(u, tickDamage, DAMAGE_TYPE, false)
+                
+            enemies.destr()

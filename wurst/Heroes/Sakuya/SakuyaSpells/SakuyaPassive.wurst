@@ -1,0 +1,30 @@
+package SakuyaPassive
+import ObjectIdGenerator
+import AbilityObjEditing
+import AbilityTooltipsHelpers
+import Icons
+
+public constant SAKUYA_PASSIVE_ID = compiletime(ABIL_ID_GEN.next())
+
+@configurable public string SPELL_ICON 
+@configurable public string SPELL_NAME = "Scarlet Maid"
+@configurable public string SPELL_TT_NORMAL = "Scarlet Maid"
+@configurable public string SPELL_TT_EXTENDED  = "[Passive]|n|nAll knives Sakuya throws have the ability to bounce off of walls.|nEverytime a knife bounces off a wall, it gains additional damage.|n|nAdditional Damage: AGI*1"
+
+@compiletime function createSpell()
+    new AbilityDefinitionBrewmasterDrunkenBrawler(SAKUYA_PASSIVE_ID)
+        ..setHeroAbility(true)
+        ..setName(SPELL_NAME)
+        ..setButtonPositionNormalX(2)
+        ..setButtonPositionNormalY(1)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, GenerateSpellName(SPELL_TT_NORMAL))
+        ..setTooltipNormalExtended(1, GenerateSpellBody(SPELL_TT_EXTENDED))
+        ..setLevels(1)
+        ..presetCastRange(lvl -> 0)
+        ..presetIcon(Icons.bTNBreathOfFire)
+        ..presetChancetoCriticalStrike(lvl -> 0)
+        ..presetChancetoEvade(lvl -> 0)
+            
+            

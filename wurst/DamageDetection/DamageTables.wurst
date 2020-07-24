@@ -1,0 +1,56 @@
+package DamageTables
+import GameSystemConstants
+
+public hashtable damageDealtHash = InitHashtable()
+public int damageDealtHashKey = "DamageDealt".getHash()
+public int healingDoneHashKey = "HealingDone".getHash()
+
+public function TrackHealingDone(unit healer, real healAmount, unit target)
+    
+    var currentHealing = 0.0
+    var viableHealingAmount = target.getMaxHP() - target.getHP()
+
+    if(healAmount > viableHealingAmount)
+        currentHealing = viableHealingAmount
+
+    var totalHealing = LoadRealBJ(healingDoneHashKey, GetPlayerId(GetOwningPlayer(healer)), damageDealtHash)
+    totalHealing+= currentHealing
+
+    SaveRealBJ(totalHealing, healingDoneHashKey, GetPlayerId(GetOwningPlayer(healer)), damageDealtHash)
+
+public function TrackDamageDealt(unit attacker, real damage, unit attackedUnit)
+    if(GetPlayerController(GetOwningPlayer(attacker)) != MAP_CONTROL_USER
+    or GetPlayerSlotState(GetOwningPlayer(attacker)) != PLAYER_SLOT_STATE_PLAYING)
+        skip
+
+    var currentDamage = damage
+
+    if(currentDamage > attackedUnit.getHP())
+        currentDamage = attackedUnit.getHP()
+
+    var totalDamage = LoadRealBJ(damageDealtHashKey, GetPlayerId(GetOwningPlayer(attacker)), damageDealtHash)
+
+    totalDamage+= currentDamage
+    SaveRealBJ(totalDamage, damageDealtHashKey, GetPlayerId(GetOwningPlayer(attacker)), damageDealtHash)
+ 
+public function DisplayBossDamage()
+    string damageChartText = "Last fight's damage chart: "
+    BJDebugMsg(damageChartText)
+
+    for u in PlayerUnits
+        DisplayUnitsDamage(u)
+ 
+    damageChartText = null
+
+public function ClearDamageDealtTables()
+
+    for u in PlayerUnits
+        ClearUnitsDamage(u)
+
+function DisplayUnitsDamage(unit currentUnit)
+
+    real totalDamage = LoadRealBJ(damageDealtHashKey, GetPlayerId(GetOwningPlayer(currentUnit)), damageDealtHash)
+    Log.info("   " + GetUnitName(GetEnumUnit()) + " has dealt a total of: " + R2S(totalDamage))
+
+function ClearUnitsDamage(unit currentUnit)
+    FlushChildHashtableBJ(GetPlayerId(GetOwningPlayer(currentUnit)), damageDealtHash)

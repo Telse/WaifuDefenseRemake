@@ -1,0 +1,34 @@
+package GroupExtensions
+
+public function group.getClosestEnemyToPoint(vec2 pos) returns unit
+    
+    unit tempUnit = null
+    for u in this
+        if tempUnit == null
+            tempUnit = u
+        else 
+            if u.getPos().distanceTo(pos) < tempUnit.getPos().distanceTo(pos)
+                tempUnit = u
+
+    return tempUnit
+
+public function unit.getClosestEnemyToUnit(real radius) returns unit
+    
+    unit tempUnit = null
+    var grp = CreateGroup()
+    var pos = this.getPos()
+
+    GroupEnumUnitsInRange(grp, pos.x, pos.y, radius, null)
+
+    for u in grp
+        if u.isEnemyOf(this.getOwner())
+            if tempUnit == null
+                tempUnit = u
+            else 
+                if u.getPos().distanceTo(pos) < tempUnit.getPos().distanceTo(pos)
+                    tempUnit = u
+
+    grp.destr()
+    grp = null
+
+    return tempUnit

@@ -1,0 +1,62 @@
+package DamageDetectionEntry
+import ClosureEvents
+import DamageType
+import GlobalCrit
+import GlobalSpellDamageIncrease
+import DamageTables
+import HealUnit
+import DamageTargetExtensions
+import RemiliaR
+import SeinQ
+import SeinE
+import SeinR
+import SeinPassive
+import FloatingDamage
+import MedeaE
+
+
+init
+  EventListener.add(EVENT_UNIT_DAMAGED) ->
+    let source = GetEventDamageSource()
+    let target = GetTriggerUnit()
+    let dt = getDamageType()
+    var dmg = GetEventDamage()
+
+
+    if(customDamageTypeMain == DamageTypeCustom.SPELL)
+      dmg = ApplyCriticalStrike(dmg, source)
+      dmg = ApplySpellDamageIncrease(dmg, source)
+
+      dmg = MedeaEDamageAmpEntry(source, dmg)
+
+      dmg = SeinQDamageShield(target, dmg)
+      dmg = SeinRDamageShield(target, dmg)
+      dmg = SeinEDamageRedirect(source, target, dmg)
+      dmg = SeinESelfHeal(target, dmg)
+
+      BlzSetEventDamage(dmg)
+      TrackDamageDealt(source, dmg, target)
+      RemiliaRVamp(source, dmg)
+      SeinManaRestorePassive(target)
+
+      customDamageTypeMain = DamageTypeCustom.NONE
+      ShowText(target, GetPlayerColorString(source.getOwner()), dmg.toInt())
+
+    else if(dt == DamageType.ATTACK)
+      dmg = ApplyCriticalStrike(dmg, source)
+
+      dmg = MedeaEDamageAmpEntry(source, dmg)
+
+      dmg = SeinQDamageShield(target, dmg)
+      dmg = SeinRDamageShield(target, dmg)
+      dmg = SeinEDamageRedirect(source, target, dmg)
+      dmg = SeinESelfHeal(target, dmg)
+
+      BlzSetEventDamage(dmg)
+      TrackDamageDealt(source, dmg, target)
+
+      RemiliaRVamp(source, dmg)
+      SeinManaRestorePassive(target)
+
+      customDamageTypeMain = DamageTypeCustom.NONE
+      ShowText(target, GetPlayerColorString(source.getOwner()), dmg.toInt())

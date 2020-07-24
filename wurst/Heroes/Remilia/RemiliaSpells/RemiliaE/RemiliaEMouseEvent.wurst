@@ -1,0 +1,113 @@
+package RemiliaEMouseEvent
+import Remilia
+import RemiliaE
+import RemiliaEHash
+import ClosureTimers
+import Vector2Extensions
+import GroupUnitsInRange
+import SpellDamageCalculationExtensions
+import DamageTargetExtensions
+import GameSystemConstants
+
+timer RemiliaERecastTimer = CreateTimer()
+
+function DisplaySpellEffect(vec2 currentPos)
+    var eff = addEffect(SPELL_EFFECT_PATH, currentPos)
+    eff.setColor(255, 0, 0)
+    eff.destr()
+
+    var eff2 = addEffect(SECONDARY_SPELL_EFFECT_PATH, currentPos)
+    eff2.setColor(255, 0, 0)
+    eff2.destr()
+
+    var eff3 = addEffect(THIRD_SPELL_EFFECT_PATH, currentPos)
+    eff3.setColor(255, 0, 0)
+    eff3.destr()
+
+    var eff4 = addEffect(FOURTH_SPELL_EFFECT_PATH, currentPos)
+    eff4.setColor(255, 0, 0)
+    eff4.destr()
+
+    var eff5 = addEffect(FIFTH_SPELL_EFFECT_PATH, currentPos)
+    eff5.setScale(.5)
+    eff5.setColor(255, 0, 0)
+    eff5.destr()
+
+function conditions() returns boolean
+    var play = GetTriggerPlayer()
+    var u =  PlayerUnits.filter(t -> t.getOwner().getId() ==  play.getId()).getFirst()
+
+    if(u.getTypeId() == REMILIA_ID) 
+    and RemiliaEActive == true
+    and RemiliaERecastTimer.getRemaining() == 0
+        return true
+    else
+        play = null
+        u =null
+        return false
+
+function actions()
+    var mouseLoc = BlzGetTriggerPlayerMousePosition()
+    var remilia =  PlayerUnits.filter(t -> t.getOwner().getId() ==  GetTriggerPlayer().getId()).getFirst()
+    var remiliaLoc = GetUnitLoc(remilia)
+    var remiliaPos = remilia.getPos()
+
+    var angle = AngleBetweenPoints(remiliaLoc, mouseLoc)
+    var dummy = createUnit(GetTriggerPlayer(),
+    REMILIA_E_DUMMY_UNIT,
+    remilia.getPos().getRandomVecAroundVec(remilia.getPos(), 100), 
+    angle.fromDeg())
+
+    var damage = remilia.calculateSpellDamage(STRENGTH_MULTIPLIER,
+    AGI_MULTIPLIER,
+    INT_MULTIPLIER,
+    BASE_DAMAGE,
+    REMILIAE_ID)
+
+    var eff = addEffect("qixuan.mdx", remilia.getPos())
+    eff.setScale(.4)
+    eff.destr()
+
+    remilia.setFacing(angle .fromDeg())
+    SetUnitTimeScalePercent(remilia, 400.00)
+    SetUnitAnimation(remilia, "Spell Two")
+    SetUnitTimeScalePercent(remilia, 100.00)
+
+    RemiliaERecastTimer.start(.10) ->
+
+    doAfter(1) ->
+        SaveRemiliaEUnit(dummy, .5)
+        var hitEnemies = CreateGroup()
+
+        Log.info(damage.toString())
+
+        for i = 1 to 21
+            var tempPos = remiliaPos.polarOffset(angle .fromDeg(), (50*i).toReal())
+            var enemies = tempPos.getEnemiesInRange(tempPos, remilia, 100)
+
+            AddSpecialEffect("Environment\\UndeadBuildingFire\\UndeadSmallBuildingFire2.mdl", tempPos.x, tempPos.y).destr()
+            DisplaySpellEffect(tempPos)
+            for u in enemies
+                if(not hitEnemies.contains(u))
+                    Log.info(u.getName())
+                    remilia.damageTargetEx(u, damage, DAMAGE_TYPE, false)
+                    hitEnemies.addUnit(u)
+        hitEnemies.destr()
+        hitEnemies = null
+
+
+init
+    var trg = CreateTrigger()
+    TriggerRegisterPlayerMouseEventBJ( trg, Player(0), bj_MOUSEEVENTTYPE_DOWN)
+    TriggerRegisterPlayerMouseEventBJ( trg, Player(1), bj_MOUSEEVENTTYPE_DOWN)
+    TriggerRegisterPlayerMouseEventBJ( trg, Player(2), bj_MOUSEEVENTTYPE_DOWN)
+    TriggerRegisterPlayerMouseEventBJ( trg, Player(3), bj_MOUSEEVENTTYPE_DOWN)
+    TriggerRegisterPlayerMouseEventBJ( trg, Player(4), bj_MOUSEEVENTTYPE_DOWN)
+    TriggerRegisterPlayerMouseEventBJ( trg, Player(5), bj_MOUSEEVENTTYPE_DOWN)
+    TriggerRegisterPlayerMouseEventBJ( trg, Player(6), bj_MOUSEEVENTTYPE_DOWN)
+    TriggerRegisterPlayerMouseEventBJ( trg, Player(7), bj_MOUSEEVENTTYPE_DOWN)
+    TriggerRegisterPlayerMouseEventBJ( trg, Player(8), bj_MOUSEEVENTTYPE_DOWN)
+    TriggerRegisterPlayerMouseEventBJ( trg, Player(9), bj_MOUSEEVENTTYPE_DOWN)
+    TriggerAddCondition(trg, Condition(function conditions))
+    TriggerAddAction(trg, function actions)
+

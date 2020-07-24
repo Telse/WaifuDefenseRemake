@@ -1,0 +1,113 @@
+package YoumuW
+import DamageTargetExtensions
+import ObjectIdGenerator
+import ChannelAbilityPreset
+import Assets
+import LinkedList
+import YoumuHelper
+import Vector2Extensions
+import YoumuFeel
+import ClosureEvents
+import ClosureTimers
+import SpellDamageCalculationExtensions
+import GroupUnitsInRange
+import AbilityTooltipsHelpers
+
+@configurable public real BASE_DAMAGE = 75
+@configurable public real BONUS_DAMAGE 
+@configurable public DamageTypeCustom DAMAGE_TYPE = DamageTypeCustom.SPELL
+              
+@configurable public string SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Orc\\Orcblood\\BattrollBlood.mdl"
+@configurable public string SECONDARY_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\BloodElfSpellThiefBlood.mdl"
+@configurable public string THIRD_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl"
+@configurable public string FOURTH_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\HumanBloodLarge0.mdl"
+@configurable public string FIFTH_SPELL_EFFECT_PATH = "baojiang.mdx"
+
+@configurable public string BONUS_EFFECT_PATH 
+@configurable public real SPELL_EFFECT_DURATION
+@configurable public real SPELL_RADIUS = 300 
+
+@configurable public string SPELL_ICON 
+@configurable public string SPELL_NAME 
+@configurable public string SPELL_TT_NORMAL = "Retreating Slash"
+@configurable public string SPELL_TT_EXTENDED  = "[Active]|n|nYoumu slashes in a circle around her before retreating backwards.|n|nMyon Effect: Each copy of Myon surrounds Youmu in a circle and deals the full damage of this spell.|nDamage: 75/Level + STR*2 + AGI*4|nAoE: 300|nCooldown: 11s"
+              
+@configurable public real BUFF_DURATION = 4
+@configurable public string BUFF_EFFECT_PATH 
+              
+@configurable public string BUFF_NAME 
+@configurable public string BUFF_TT 
+              
+@configurable public real INT_MULTIPLIER = 0
+@configurable public real STRENGTH_MULTIPLIER = 2
+@configurable public real AGI_MULTIPLIER = 4
+
+public constant YOUMU_W_ID = compiletime(ABIL_ID_GEN.next())
+
+@compiletime function CreateYoumuW()
+    new ChannelAbilityPreset(YOUMU_W_ID, 5, true)
+        ..setHeroAbility(true)
+        ..presetHotkey("W")
+        ..setName("Youmu W")
+        ..setButtonPositionNormalX(1)
+        ..setButtonPositionNormalY(2)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, GenerateSpellName(SPELL_TT_NORMAL))
+        ..setTooltipNormalExtended(1, GenerateSpellBody(SPELL_TT_EXTENDED))
+        ..presetTargetTypes(Targettype.NONE)
+        ..setLevels(5)
+        ..presetManaCost(lvl -> 0)
+        ..presetCooldown(lvl -> 11)
+        ..presetIcon(Icons.bTNBreathOfFire)
+        ..presetCastRange(lvl -> 700.0)
+
+function spawnGhost(unit youmu)  returns LinkedList<unit>
+    var youmuLoc = youmu.getPos()
+    var dummyList = new LinkedList<unit>()
+
+    int procs = CalculateMultiCasts(youmu.getAgi(true))
+
+    for int x = 0 to procs
+        var loc = youmu.getPos()
+        var dummyLoc = loc.polarOffset(60*x .toReal().fromDeg(), 150)
+        var angle = dummyLoc.angleTo(loc)
+        var dummy = createUnit(youmu.getOwner(), YOUMU_GHOST_DUMMY_UNIT, dummyLoc, youmu.getFacingAngle())
+
+        dummy.setAnimation(1)
+        DestroyEffect(AddSpecialEffectTargetUnitBJ("origin", dummy, Abilities.blinkCaster))
+        dummyList.add(dummy)
+    return dummyList
+
+
+init   
+    registerSpellEffectEvent(YOUMU_W_ID) ->
+        var triggerUnit = GetTriggerUnit()
+        var dummyList = spawnGhost(triggerUnit)
+        triggerUnit.pause()
+        triggerUnit.setAnimation("spell slam one")
+        doAfter(.1) ->
+            var damage = triggerUnit.calculateSpellDamage(
+                STRENGTH_MULTIPLIER,
+                AGI_MULTIPLIER,
+                INT_MULTIPLIER,
+                BASE_DAMAGE,
+                YOUMU_W_ID)
+
+            for u in dummyList
+                var dummyEnemies = u.getPos().getEnemiesInRange(u.getPos(), u, SPELL_RADIUS)
+                u.setAnimation("spell slam one")
+
+                for enemy in dummyEnemies
+                    triggerUnit.damageTargetEx(enemy, damage, DAMAGE_TYPE, false)
+
+            var enemies = triggerUnit.getPos().getEnemiesInRange(triggerUnit.getPos(), triggerUnit, SPELL_RADIUS) 
+            
+            for enemy in enemies
+                triggerUnit.damageTargetEx(enemy, damage, DAMAGE_TYPE, false)
+
+        doAfter(.7) ->
+            for u in dummyList
+                u.kill()
+                u.remove()
+            triggerUnit.unpause()

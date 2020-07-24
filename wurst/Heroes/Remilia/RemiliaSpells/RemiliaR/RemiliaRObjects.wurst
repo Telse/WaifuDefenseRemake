@@ -1,0 +1,31 @@
+package RemiliaRObjects
+import ObjectIdGenerator
+import BuffObjEditing
+import Icons
+import RemiliaRConstants
+import ChannelAbilityPreset
+import AbilityTooltipsHelpers
+
+
+public let REMILIAR_ID = compiletime(ABIL_ID_GEN.next())
+public let REMILIA_R_DUMMY_BUFF = compiletime(createDummyBuffObject(BUFF_NAME, BUFF_TT, BUFF_ICON_PATH, BUFF_EFFECT_PATH, "chest"))
+
+@compiletime function CreateRemiliaR()
+    new ChannelAbilityPreset(REMILIAR_ID, 5, true)
+        ..setHeroAbility(true)
+        ..presetHotkey("R")
+        ..setName("Remilia R")
+        ..setButtonPositionNormalX(3)
+        ..setButtonPositionNormalY(2)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, GenerateSpellName(SPELL_TT_NORMAL))
+        ..setTooltipNormalExtended(1, GenerateSpellBody(SPELL_TT_EXTENDED))
+        ..presetTargetTypes(Targettype.NONE)
+        ..setLevels(5)
+        ..presetManaCost(lvl -> 0)
+        ..presetCooldown(lvl -> 40)
+        ..presetIcon(Icons.bTNBreathOfFire)
+        ..presetCastRange(lvl -> 700.0)
+        ..presetTooltipLearn(lvl -> SPELL_TT_LEARN)
+        ..presetTooltipLearnExtended(lvl -> SPELL_TT_LEARN_EXTENDED)

@@ -1,0 +1,27 @@
+package PartyDeath
+import ClosureTimers
+import PartyMissionSetup
+import GameSystemConstants
+import BossLogic
+
+function arePlayersDead() returns bool
+    var aliveUnits = PlayerUnits.filter(t -> t.isAlive()).getSize()
+
+    if(aliveUnits > 0 )
+        return false
+    else
+        return true
+
+init
+    doPeriodically(.2) cb ->
+        if(arePlayersDead() and PlayerUnits.size() > 0)
+            ResetPartyAfterMission()
+            Log.info("All Allies Dead")
+
+            CurrentBoss = null
+
+        if EnemyUnits.size() ==  0 and PlayerUnits.size() > 0
+            for u in PlayerUnits
+                
+                if u.isAlive() == false
+                    u.revive(gg_rct_Lobby.getCenter(), true)

@@ -1,0 +1,36 @@
+package StatLevelingSpellBook
+import ChannelAbilityPreset
+import Icons
+import IncreaseAgility
+import IncreaseCritChance
+import IncreaseCritDamage
+import IncreaseIntelligence
+import IncreaseSpellDamage
+import IncreaseStrength
+
+public constant STALEVELSPELLBOOK_ID = compiletime(ABIL_ID_GEN.next())
+
+@compiletime function CreateStatLevelingSpellBook()
+    new AbilityDefinitionSpellBook(STALEVELSPELLBOOK_ID)
+        ..setHeroAbility(false)
+        ..presetHotkey("T")
+        ..setName("Stat Leveling - [T]")
+        ..setButtonPositionNormalX(1)
+        ..setButtonPositionNormalY(1)
+        ..setTooltipNormal(1, "Stat Leveling - [T]")
+        ..setTooltipNormalExtended(1, "Contains all your leveling stuff")
+        ..setLevels(1)
+        ..presetCooldown(lvl -> .5)
+        ..presetIcon(Icons.bTNSpellBookBLS)
+        ..setMinimumSpells(1, 11)
+        ..setMaximumSpells(1, 11)
+        ..setSpellList(1, commaList(
+                                    INCREASESTRENGTH_ID,
+                                    INCREASEAGILITY_ID,
+                                    INCREASEINTELLIGENCE_ID,
+                                    INCREASECRITCHANCE_ID,
+                                    INCREASECRITDAMAGE_ID,
+                                    INCREASESPELLDAMAGE_ID))
+        ..setSharedSpellCooldown(1, false)
+
+            

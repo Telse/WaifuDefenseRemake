@@ -1,0 +1,34 @@
+package DeformTerrainTest
+import ObjectIdGenerator
+import ChannelAbilityPreset
+import RegisterEvents
+import EventHelper
+import Icons
+
+public constant DEFORM_TERRAIN_SPELL_ID = compiletime(ABIL_ID_GEN.next())
+public int Range = 50
+
+
+@compiletime function CreateTestAoeSpell()
+    new ChannelAbilityPreset(DEFORM_TERRAIN_SPELL_ID, 5, true)
+        ..setHeroAbility(false)
+        ..presetHotkey("Z")
+        ..setName("TEST AOE")
+        ..setButtonPositionNormalX(0)
+        ..setButtonPositionNormalY(2)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, "Test aoe circles")
+        ..setTooltipNormalExtended(1, "Test Aoe Circles")
+        ..presetTargetTypes(Targettype.POINT)
+        ..setLevels(1)
+        ..presetManaCost(lvl -> 0)
+        ..presetCooldown(lvl -> 2)
+        ..presetIcon(Icons.bTNBreathOfFire)
+
+init  
+    registerSpellEffectEvent(DEFORM_TERRAIN_SPELL_ID) ->
+        var triggerUnit = GetTriggerUnit()
+        var target = getSpellTargetPos()
+
+        TerrainDeformCrater(triggerUnit.getX(), triggerUnit.getY(), 512, 512, 200, true)

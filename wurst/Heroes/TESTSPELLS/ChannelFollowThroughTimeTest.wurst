@@ -1,0 +1,37 @@
+package ChannelFollowThroughTimeTest
+import ChannelAbilityPreset
+import Icons
+import RegisterEvents
+import EventHelper
+import Abilities
+import ClosureTimers
+
+public constant CHANNEL_FOLLOW_SPELL_ID = compiletime(ABIL_ID_GEN.next())
+public int Range = 50
+
+int orderId = 852097
+
+@compiletime function CreateTestAoeSpell()
+    new ChannelAbilityPreset(CHANNEL_FOLLOW_SPELL_ID, 5, true)
+        ..setHeroAbility(false)
+        ..presetHotkey("Z")
+        ..setName("TEST AOE")
+        ..setButtonPositionNormalX(0)
+        ..setButtonPositionNormalY(2)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, "Test aoe circles")
+        ..setTooltipNormalExtended(1, "Test Aoe Circles")
+        ..presetTargetTypes(Targettype.POINT)
+        ..setLevels(1)
+        ..presetManaCost(lvl -> 0)
+        ..presetCooldown(lvl -> 4)
+        ..presetIcon(Icons.bTNBreathOfFire)
+        ..setFollowThroughTime(1, 6)
+
+init
+    registerPlayerUnitEvent(EVENT_PLAYER_UNIT_SPELL_CHANNEL) ->
+        
+        var triggerUnit = GetTriggerUnit()
+
+        doPeriodicallyTimed(.1, 6) cb ->

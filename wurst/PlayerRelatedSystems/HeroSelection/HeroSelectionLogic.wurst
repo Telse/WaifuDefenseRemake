@@ -1,0 +1,40 @@
+package HeroSelectionLogic
+import GameSystemConstants
+import ClosureEvents
+import PlayerSetupLogic
+import ClosureTimers
+import SetButtonPositions
+import StaticFramesLoad
+
+
+unit array selectedUnit
+
+function playerAlreadyOwnsHero(int playerId) returns boolean
+    var ownedUnit = PlayerUnits.filter(t -> GetPlayerId(t.getOwner()) == playerId ).getFirst()
+
+    if ownedUnit == null
+        return false
+    else
+        Log.info("HERO SELECTION:     Player " + playerId.toString() + " already owns a hero ---  Owned Hero: " + ownedUnit.getName())
+        return true
+
+init
+    EventListener.add(EVENT_PLAYER_UNIT_SELECTED) ->
+        let target = GetTriggerUnit()
+        let currentPlayer = GetTriggerPlayer()
+        let playerId = GetPlayerId(currentPlayer)
+
+        Log.info("HERO SELECTION: " + playerId.toString() + " has selected target: " + target.getName())
+        if(selectedUnit[playerId] == target 
+        and not playerAlreadyOwnsHero(playerId))
+
+            PlayerUnits.add(target)
+            SetUnitOwner(target, currentPlayer, true)
+            Log.info("HERO SELECTION: " + playerId.toString() + " has confirmed target:  " + target.getName())
+            SetUpPlayer(currentPlayer)
+            target.setPos(gg_rct_Lobby.getCenter())
+            currentPlayer.setCameraField(CAMERA_FIELD_TARGET_DISTANCE, 20.0 * 120, 0)
+            SetHeroSpellButtonScheme()
+            ShowPlayerStats()
+
+        selectedUnit[GetPlayerId(currentPlayer)] = target

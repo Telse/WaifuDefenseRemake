@@ -1,0 +1,141 @@
+package RemiliaQ
+
+import ClosureEvents
+import ClosureTimers
+import GroupUnitsInRange
+import DamageTargetExtensions
+import SpellDamageCalculationExtensions
+import HashMap
+import ObjectIdGenerator
+import Icons
+import Abilities
+import ChannelAbilityPreset
+import BuffObjEditing
+import AbilityTooltipsHelpers
+
+@configurable public real BASE_DAMAGE = 100
+@configurable public real BONUS_DAMAGE 
+@configurable public DamageTypeCustom DAMAGE_TYPE = DamageTypeCustom.SPELL
+              
+@configurable public string SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Orc\\Orcblood\\BattrollBlood.mdl"
+@configurable public string SECONDARY_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\BloodElfSpellThiefBlood.mdl"
+@configurable public string THIRD_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl"
+@configurable public string FOURTH_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\HumanBloodLarge0.mdl"
+@configurable public string FIFTH_SPELL_EFFECT_PATH = "baojiang.mdx"
+
+@configurable public string BONUS_EFFECT_PATH 
+@configurable public real SPELL_EFFECT_DURATION
+@configurable public real SPELL_RADIUS = 75 
+
+@configurable public string SPELL_ICON 
+@configurable public string SPELL_NAME 
+@configurable public string SPELL_TT_NORMAL = "Scarlet Sign 'Scarlet Shoot' [Q]"
+@configurable public string SPELL_TT_EXTENDED  = "[Active]|n|nAfter a short delay, Remilia shoots energy in a line. One second after the first blast, a second blast will follow.|n|nSpecial: Remilia does not need to channel this spell.|nDamage Per Blast: 100*Level + INT*3 + STR*2 |nRange: 700|nCooldown: 3s"
+              
+@configurable public real BUFF_DURATION = 4
+@configurable public string BUFF_EFFECT_PATH 
+              
+@configurable public string BUFF_NAME 
+@configurable public string BUFF_TT 
+              
+@configurable public real INT_MULTIPLIER = 3
+@configurable public real STRENGTH_MULTIPLIER = 2
+@configurable public real AGI_MULTIPLIER = 0
+
+public constant REMILIAQ_ID = compiletime(ABIL_ID_GEN.next())
+public constant REMILIAQ_BUFF = compiletime(createDummyBuffObject(
+                                                    "Test", 
+                                                    "TEst2", 
+                                                    Icons.bTNBreathOfFire, 
+                                                    Abilities.incinerateBuff, 
+                                                    "chest"))
+
+@compiletime function CreateRemiliaQ()
+    new ChannelAbilityPreset(REMILIAQ_ID, 5, true)
+        ..setHeroAbility(true)
+        ..presetHotkey("Q")
+        ..setName("Remilia Q")
+        ..setButtonPositionNormalX(0)
+        ..setButtonPositionNormalY(2)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, GenerateSpellName(SPELL_TT_NORMAL))
+        ..setTooltipNormalExtended(1, GenerateSpellBody(SPELL_TT_EXTENDED))
+        ..presetTargetTypes(Targettype.POINT)
+        ..setLevels(5)
+        ..presetManaCost(lvl -> 0)
+        ..presetCooldown(lvl -> 3)
+        ..presetIcon(Icons.bTNBreathOfFire)
+        ..presetCastRange(lvl -> 700.0)
+
+
+let buffId = REMILIAQ_BUFF.abilId
+let buffMap = new HashMap<unit, CallbackSingle>
+
+function DisplaySpellEffect(vec2 currentPos)
+    var eff = addEffect(SPELL_EFFECT_PATH, currentPos)
+    eff.setColor(255, 0, 0)
+    eff.destr()
+
+    var eff2 = addEffect(SECONDARY_SPELL_EFFECT_PATH, currentPos)
+    eff2.setColor(255, 0, 0)
+    eff2.destr()
+
+    var eff3 = addEffect(THIRD_SPELL_EFFECT_PATH, currentPos)
+    eff3.setColor(255, 0, 0)
+    eff3.destr()
+
+    var eff4 = addEffect(FOURTH_SPELL_EFFECT_PATH, currentPos)
+    eff4.setColor(255, 0, 0)
+    eff4.destr()
+
+    var eff5 = addEffect(FIFTH_SPELL_EFFECT_PATH, currentPos)
+    eff5.setScale(.5)
+    eff5.setColor(255, 0, 0)
+    eff5.destr()
+
+init   
+    registerSpellEffectEvent(REMILIAQ_ID) ->
+        var triggerUnit = GetTriggerUnit()
+        var initialpos = triggerUnit.getPos()
+        var currentPos = triggerUnit.getPos() 
+        var spellTarget = getSpellTargetPos()
+        var angle = currentPos.angleTo(spellTarget)
+
+        real damage = triggerUnit.calculateSpellDamage(STRENGTH_MULTIPLIER,
+        AGI_MULTIPLIER,
+        INT_MULTIPLIER,
+        BASE_DAMAGE,
+        REMILIAQ_ID)
+
+        doAfter(1) ->
+            var hitEnemies = CreateGroup()
+
+            for i = 0 to 14
+                var enemies = currentPos.getEnemiesInRange(currentPos, triggerUnit, SPELL_RADIUS)
+                currentPos = currentPos.polarOffset(angle, 50.0)
+
+                DisplaySpellEffect(currentPos)
+
+                for u in enemies
+                    if(not hitEnemies.contains(u))
+                        triggerUnit.damageTargetEx(u, damage, DAMAGE_TYPE, false)
+                        hitEnemies.addUnit(u)
+            doAfter(2) ->
+                hitEnemies.clear()
+                currentPos = initialpos
+
+                for i = 0 to 14
+                    var enemies = currentPos.getEnemiesInRange(currentPos, triggerUnit, SPELL_RADIUS)
+                    currentPos = currentPos.polarOffset(angle, 50.0)
+
+                    DisplaySpellEffect(currentPos)
+
+                    for u in enemies
+                        if(not hitEnemies.contains(u))
+                            triggerUnit.damageTargetEx(u, damage, DAMAGE_TYPE, false)
+                            hitEnemies.addUnit(u)
+
+        
+        
+            

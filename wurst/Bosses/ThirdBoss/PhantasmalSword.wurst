@@ -1,0 +1,77 @@
+package PhantasmalSword
+
+import ISpell
+import ClosureTimers
+import Knockback3
+import GroupExtensions
+import BossHelpers
+import GroupUnitsInRange
+import DamageTargetExtensions
+import Abilities
+
+public class PhantasmalSword implements ISpell
+
+    bool _internalPauseTimer = false
+    real _pauseTime = 6.1
+    string _name = "Phantasmal Slash"
+
+    unit tempTarget = null
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+        caster.setAnimation(15)
+        var initialPos = caster.getPos()
+        tempTarget = caster.getClosestEnemyToUnit(5000)
+
+        doPeriodicallyTimed(.03, 6) (CallbackCounted cb) ->
+            if caster.isAlive()
+                var angle = caster.getPos().angleTo(tempTarget.getPos())
+                var distance = caster.getPos().distanceTo(tempTarget.getPos())
+
+                var pos2 = initialPos.polarOffset(angle + 90 .fromDeg(), 70)
+                var pos3 = initialPos.polarOffset(angle - 90 .fromDeg(), 70)
+
+                angle = initialPos.angleTo(tempTarget.getPos())
+                distance = initialPos.distanceTo(tempTarget.getPos())
+
+                caster.setFacing(angle)
+
+                SetBossLineIndicator(initialPos, angle.radians(), distance, .03)
+                SetBossLineIndicator(pos2, angle.radians(), distance, .03)
+                SetBossLineIndicator(pos3, angle.radians(), distance, .03)
+
+        doPeriodicallyTimed(3, 6) cb ->
+            if caster.isAlive()
+                caster.setAnimation(15)
+                real secondDistance = 0
+                var angle = caster.getPos().angleTo(tempTarget.getPos())
+                var distance = caster.getPos().distanceTo(tempTarget.getPos())
+                var pos2 = initialPos.polarOffset(angle + 90 .fromDeg(), 70)
+                var pos3 = initialPos.polarOffset(angle - 90 .fromDeg(), 70)
+
+                SetBossLineIndicator(initialPos, angle.radians(), distance, 2)
+                SetBossLineIndicator(pos2, angle.radians(), distance, 2)
+                SetBossLineIndicator(pos3, angle.radians(), distance, 2)
+
+                doPeriodicallyTimed(0.03, 2) (CallbackCounted cb) ->
+                    var newPos = initialPos.polarOffset(angle, secondDistance)
+                    var eff  = AddSpecialEffect("GetsugaNewBlue.mdx", newPos.x,  newPos.y)
+
+                    newPos.damageTargetEnemyGroupEx(caster, 105, 50, DamageTypeCustom.SPELL, false)
+
+                    eff.setScale(2)
+                    eff.destr()
+                    eff = null
+
+                    secondDistance+=75
+
+        doAfter(6.1) () ->
+            tempTarget = null

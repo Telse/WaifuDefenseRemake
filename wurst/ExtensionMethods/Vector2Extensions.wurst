@@ -1,0 +1,8 @@
+package Vector2Extensions
+
+public function vec2.getRandomVecAroundVec(vec2 position, int variation) returns vec2
+    var tempPos = position
+
+    tempPos.x += GetRandomInt(variation*-1, variation)
+    tempPos.y += GetRandomInt(variation*-1, variation)
+    return tempPos

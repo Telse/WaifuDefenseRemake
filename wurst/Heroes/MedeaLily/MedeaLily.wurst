@@ -1,0 +1,65 @@
+package MedeaLily
+import ObjectIdGenerator
+import UnitObjEditing
+import IBaseSpellConfigurable
+import MedeaQ
+import ObjectIds
+import MedeaW
+import MedeaLilyId
+import MedeaE
+import MedeaR
+import StatLevelingSpellBook
+import MedeaPassive
+
+@compiletime function createUnit()
+    new HeroDefinition(MEDEALILY_ID, UnitIds.bloodmage)
+    ..setName("Caster")
+    ..setProperNames("Medea (Lily)")
+    ..setProperNamesUsed(1)
+    ..setIconGameInterface("ReplaceableTextures\\CommandButtons\\BTNElvenFarm.blp")
+    ..setIconScoreScreen("")
+    ..setModelFile("heromedeialily.mdx")
+    ..setMovementType(MovementType.Foot)
+    ..setRace(Race.Human)
+    ..setNormalAbilities(commaList("AInv".fromRawCode(), MEDEA_PASSIVE_ID, STALEVELSPELLBOOK_ID))
+    ..setTurnRate(3.0)
+    ..setAgilityPerLevel(0)
+    ..setStrengthPerLevel(0)
+    ..setIntelligencePerLevel(0)
+    ..setFoodCost(0)
+    ..setHitPointsMaximumBase(1200)
+    ..setHitPointsRegenerationRate(0)
+    ..setManaInitialAmount(1200)
+    ..setManaMaximum(1200)
+    ..setManaRegeneration(0)
+    ..setStartingAgility(0)
+    ..setStartingStrength(0)
+    ..setStartingIntelligence(0)
+    ..setFoodCost(0)
+    ..setAttack1CooldownTime(2)
+    ..setAttack1Range(600)
+    ..setAttack1ProjectileArt(Abilities.manaDrainTarget)
+    ..setAttack1DamageBase(35)
+    ..setAttacksEnabled(1)
+    ..setSpeedBase(310)
+    ..setCollisionSize(1)
+    ..setRace(Race.Human)
+    ..setArmorType(ArmorType.Hero)
+    ..setAnimationBlendTimeseconds(0.0)
+    ..setAnimationCastBackswing(0.0)
+    ..setMaximumPitchAngledegrees(0.0)
+    ..setMaximumRollAngledegrees(0.0)
+    ..setSightRadiusDay(1000)
+    ..setSightRadiusNight(1000)
+    ..setPropulsionWindowdegrees(1.0)
+    ..setUnitClassification("_")
+    ..hideHeroDeathMsg(false)
+    ..setScalingValue(.60)
+    ..setHeroAbilities(commaList(MEDEA_Q_ID, MEDEA_W_ID, MEDEA_E_ID, MEDEA_R_ID))
+    ..setDefenseBase(0)
+    ..setPrimaryAttribute("STR")
+    ..setAttack1AnimationBackswingPoint(.1)
+    ..setAttack1AnimationDamagePoint(.1)
+    ..setAttack1WeaponSound(WeaponSound.Nothing)
+    ..setAttack1DamageSidesperDie(1)
+    ..setAttack1DamageNumberofDice(1)

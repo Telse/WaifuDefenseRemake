@@ -1,0 +1,69 @@
+package Sakuya
+import ObjectIdGenerator
+import UnitIds
+import UnitObjEditing
+import ObjectIds
+import SakuyaQObjects
+import SakuyaWObjects
+import SakuyaRObjects
+import StatLevelingSpellBook
+import SakuyaPassive
+import TestLineIndicatorSpell
+import GroupUnitsSpell
+import DeformTerrainTest
+import ChannelFollowThroughTimeTest
+import SakuyaE
+
+public constant SAKUYA_ID = compiletime(HERO_ID_GEN.next())
+
+@compiletime function createUnit()
+    new HeroDefinition(SAKUYA_ID, UnitIds.bloodmage)
+    ..setName("Scarlet Maid")
+    ..setProperNames("Sakuya Izayoi")
+    ..setProperNamesUsed(1)
+    ..setIconGameInterface("ReplaceableTextures\\CommandButtons\\BTNElvenFarm.blp")
+    ..setIconScoreScreen("")
+    ..setModelFile("Character Model Sakuya.mdx")
+    ..setMovementType(MovementType.Foot)
+    ..setRace(Race.Human)
+    ..setNormalAbilities(commaList("AInv".fromRawCode(), SAKUYA_PASSIVE_ID, STALEVELSPELLBOOK_ID))
+    ..setTurnRate(3.0)
+    ..setAgilityPerLevel(0)
+    ..setStrengthPerLevel(0)
+    ..setIntelligencePerLevel(0)
+    ..setFoodCost(0)
+    ..setHitPointsMaximumBase(1000)
+    ..setHitPointsRegenerationRate(0)
+    ..setManaMaximum(1200)
+    ..setManaInitialAmount(1200)
+    ..setManaRegeneration(0)
+    ..setStartingAgility(0)
+    ..setStartingStrength(0)
+    ..setStartingIntelligence(0)
+    ..setFoodCost(0)
+    ..setAttack1CooldownTime(1.00)
+    ..setAttack1DamageBase(30)
+    ..setAttacksEnabled(1)
+    ..setSpeedBase(320)
+    ..setCollisionSize(1)
+    ..setRace(Race.Human)
+    ..setArmorType(ArmorType.Hero)
+    ..setAnimationBlendTimeseconds(0.0)
+    ..setAnimationCastBackswing(0.0)
+    ..setMaximumPitchAngledegrees(0.0)
+    ..setMaximumRollAngledegrees(0.0)
+    ..setSightRadiusDay(1000)
+    ..setSightRadiusNight(1000)
+    ..setPropulsionWindowdegrees(1.0)
+    ..setUnitClassification("_")
+    ..hideHeroDeathMsg(false)
+    ..setScalingValue(.65)
+    ..setHeroAbilities(commaList(SAKUYAQ_ID, SAKUYAW_ID, SAKUYAE_ID, SAKUYAR_ID))
+    ..setDefenseBase(0)
+    ..setPrimaryAttribute("AGI")
+    ..setAttack1ProjectileArt("Sakuya_weapon.mdx")
+    ..setAttack1ProjectileSpeed(1200)
+    ..setAttack1AnimationBackswingPoint(0)
+    ..setAttack1AnimationDamagePoint(.1)
+    ..setAttack1DamageSidesperDie(1)
+    ..setAttack1DamageNumberofDice(1)

@@ -1,0 +1,75 @@
+package FrozenCoffin
+import ISpell
+import ClosureTimers
+import ObjEditingCommons
+import ChannelAbilityPreset
+import GroupUnitsInRange
+import DamageTargetExtensions
+
+public constant FROZEN_COFFIN_DUMMY_UNIT = compiletime(UNIT_ID_GEN.next())
+
+@compiletime function CreateFrozenCoffinDummy()
+    new UnitDefinition(FROZEN_COFFIN_DUMMY_UNIT, 'hfoo')
+    ..setName("Gungnir")
+    ..setIconGameInterface("ReplaceableTextures\\CommandButtons\\BTNElvenFarm.blp")
+    ..setModelFile("Abilities\\Spells\\Undead\\FreezingBreath\\FreezingBreathTargetArt.mdl")
+    ..setMovementType(MovementType.Foot)
+    ..setRace(Race.Human)
+    ..setAttacksEnabled(0)
+    ..setSpeedBase(0)
+    ..setManaInitialAmount(0)
+    ..setManaMaximum(0)
+    ..setManaRegeneration(0)
+    //..setNormalAbilities()
+    ..setShadowImageCenterX(0)
+    ..setShadowImageCenterY(0)
+    ..setShadowImageUnit("")
+    ..setShadowImageHeight(0)
+    ..setShadowImageWidth(0)
+    ..setCollisionSize(0)
+    ..setFoodCost(0)
+    ..setSightRadiusDay(0)
+    ..setSightRadiusNight(0)
+    ..setHitPointsMaximumBase(100)
+    ..setScalingValue(1.5)
+
+public class FrozenCoffin implements ISpell
+
+    bool _internalPauseTimer = false
+    real _pauseTime = 3
+    string _name = "Frozen Coffin"
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+    
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+        var enemies = caster.getEnemiesInRange(caster, 1500)
+        var frostedUnit = enemies.getRandomUnit()
+        var ice = createUnit(caster.getOwner(), FROZEN_COFFIN_DUMMY_UNIT, frostedUnit.getPos(), 0 .fromDeg())
+
+        frostedUnit.pause()
+
+        doPeriodicallyCounted(.25, 32) (CallbackCounted cb) ->
+            if(frostedUnit.isAlive() == false)
+                frostedUnit.unpause()
+
+            if(ice.isAlive() and caster.isAlive())
+                caster.damageTargetEx(frostedUnit, 10, DamageTypeCustom.SPELL, false)
+            else
+                frostedUnit.unpause()
+
+        doAfter(8) () ->
+            frostedUnit.unpause()
+            if(ice.isAlive() and caster.isAlive())
+                caster.damageTargetEx(frostedUnit, 500, DamageTypeCustom.SPELL, false)    
+            
+            ice.kill()
+            ice.remove()
+            ice = null
+            

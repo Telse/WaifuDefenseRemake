@@ -1,0 +1,12 @@
+package PlayerSetupLogic
+
+public function SetUpPlayer(player play)
+    BuildStatLeveler(play)
+    GiveStartingResources(play)
+
+function BuildStatLeveler(player play)
+    play.setCameraBoundsToRect(gg_rct_Lobby)
+
+function GiveStartingResources(player play)
+    play.addGold(100)
+    play.addLumber(20)

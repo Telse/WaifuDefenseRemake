@@ -1,0 +1,46 @@
+package SeinQ
+import ClosureEvents
+import SeinQObjects
+import ClosureTimers
+import Abilities
+import Sein
+import SpellDamageCalculationExtensions
+
+public real SeinQShieldAmount = 0
+public bool SeinQActive = false
+
+
+public function SeinQDamageShield(unit target, real damage) returns real
+
+    if target.getTypeId() == SEIN_ID and SeinQActive == true
+
+        if damage > SeinQShieldAmount
+            SeinQShieldAmount = 0
+            return damage - SeinQShieldAmount
+        
+        else
+            SeinQShieldAmount -= damage
+            return 0.0
+    else
+        return damage
+
+init
+    registerSpellEffectEvent(SEINQ_ID) ->
+        var tU = GetTriggerUnit()
+        var eff = AddSpecialEffectTarget(Abilities.antiMagicShell, tU, "chest")
+       
+        eff.setColor(0, 0, 255)
+        eff.setScale(2.0)
+        SeinQActive = true
+        SeinQShieldAmount =  300 + tU.calculateSpellDamage(1, 0, 2, 50, SEINQ_ID)
+
+        doPeriodicallyCounted(.05, 160) cb ->
+            if SeinQShieldAmount <= 0  and SeinQActive == true
+                eff.destr()
+                SeinQActive = false
+                tU.addMana(tU.getMaxMana()/2)
+        
+        doAfter(8.1) ->
+                SeinQShieldAmount = 0
+                eff.destr()
+                SeinQActive = false

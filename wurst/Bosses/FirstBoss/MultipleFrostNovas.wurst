@@ -1,0 +1,42 @@
+package MultipleFrostNovas
+import ISpell
+import DamageTargetExtensions
+import ClosureTimers
+import GroupUnitsInRange
+import Abilities
+import BossHelpers
+
+public class MultipleFrostNovas implements ISpell
+
+    bool _internalPauseTimer = false
+    real _pauseTime = 0
+    string _name = "Multi-Cast Frost Nova"
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+    
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+        var enemies = caster.getEnemiesInRange(caster, 1000)
+        var frostedUnit = enemies.getRandomUnit()
+
+        enemies.destr()
+        enemies =null
+
+        doPeriodicallyCounted(.2, 25) cb ->
+        
+            if(frostedUnit != null)
+                var frostedPos = frostedUnit.getPos()
+                var nearbyEnemies = frostedPos.getEnemiesInRange(frostedPos, caster, 250)
+                flashEffect(Abilities.frostNovaTarget, frostedUnit.getPos())
+
+                for u in nearbyEnemies
+                    caster.damageTargetEx(u, 10, DamageTypeCustom.SPELL, false)
+
+                nearbyEnemies.destr()
+                nearbyEnemies = null

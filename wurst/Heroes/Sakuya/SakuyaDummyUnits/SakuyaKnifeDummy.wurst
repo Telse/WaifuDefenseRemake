@@ -1,0 +1,28 @@
+package SakuyaKnifeDummy
+import ObjectIdGenerator
+import UnitObjEditing
+import ObjectIds
+public constant SAKUYA_KNIFE_DUMMY_UNIT = compiletime(UNIT_ID_GEN.next())
+
+@compiletime function CreateRemiliaEDummy()
+    new UnitDefinition(SAKUYA_KNIFE_DUMMY_UNIT, 'hfoo')
+    ..setName("Sakuya's Knife")
+    ..setIconGameInterface("ReplaceableTextures\\CommandButtons\\BTNElvenFarm.blp")
+    ..setModelFile("Sakuya_Knief.mdx")
+    ..setMovementType(MovementType.Fly)
+    ..setRace(Race.Human)
+    ..setAttacksEnabled(0)
+    ..setSpeedBase(20)
+    ..setManaInitialAmount(20)
+    ..setManaMaximum(100)
+    ..setManaRegeneration(0)
+    ..setNormalAbilities(commaList('Avul', 'Aloc'))
+    ..setShadowImageCenterX(0)
+    ..setShadowImageCenterY(0)
+    ..setShadowImageUnit("")
+    ..setShadowImageHeight(0)
+    ..setShadowImageWidth(0)
+    ..setCollisionSize(0)
+    ..setFoodCost(0)
+    ..setSightRadiusDay(0)
+    ..setSightRadiusNight(0)

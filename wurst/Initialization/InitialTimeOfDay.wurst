@@ -1,0 +1,7 @@
+package InitialTimeOfDay
+import ClosureTimers
+
+init
+    doAfter(.1) ->
+        SetTimeOfDay(12)
+        SetTimeOfDayScale(0)

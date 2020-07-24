@@ -1,0 +1,64 @@
+package SeinE
+import DamageTargetExtensions
+import ClosureEvents
+import SeinEObjects
+import BuffObjEditing
+import GroupUnitsInRange
+import SeinEConstants
+import HashMap
+import ClosureTimers
+import Sein
+import HealUnit
+import SeinQ
+import GameSystemConstants
+
+public let SEIN_E_BUFF_ID = SEIN_E_BUFF_OBJ.abilId
+public let SEIN_E_SELF_BUFF_ID = SEIN_E_SELF_BUFF_OBJ.abilId
+public let SEIN_E_BUFFMAP = new HashMap<unit, CallbackSingle>
+
+public function SeinESelfHeal(unit target, real dmg) returns real
+    if(target.hasAbility(SEIN_E_SELF_BUFF_ID))
+        Log.info("Healing Sein!")
+        var healAmount  = (target.getMaxHP() * .01) * target.getAbilityLevel(SEIN_E_ID)
+        target.healUnit(target, healAmount, target)
+
+        if dmg < healAmount
+            return 0
+        else
+            return dmg - healAmount
+    else 
+        return dmg
+
+public function SeinEDamageRedirect(unit source, unit target, real damage) returns real
+    if target.hasAbility(SEIN_E_BUFF_ID)
+
+        if damage >= SeinQShieldAmount
+            SeinQShieldAmount = 0
+            source.damageTargetEx(PlayerUnits.filter(t -> t.getTypeId() == SEIN_ID).getFirst(), damage - SeinQShieldAmount, DamageTypeCustom.SPELL, true)
+        else
+            SeinQShieldAmount -= damage
+            source.damageTargetEx(PlayerUnits.filter(t -> t.getTypeId() == SEIN_ID).getFirst(), 0, DamageTypeCustom.SPELL, true)
+        return 0.0
+    
+    return damage
+
+init
+    registerSpellEffectEvent(SEIN_E_ID) ->
+        var tU  = GetTriggerUnit()
+        var allies = tU.getAlliesInRange(tU, 1000)
+
+        var duration = tU.getAbilityLevel(SEIN_E_ID) + BUFF_DURATION
+        for u in allies
+            if u == tU
+                tU.addAbility(SEIN_E_SELF_BUFF_ID)
+            else
+                u.addAbility(SEIN_E_BUFF_ID)
+
+            let cb = doAfter(duration) ->
+                if SEIN_E_BUFFMAP.has(u)
+                    SEIN_E_BUFFMAP.remove(u)
+                    u.removeAbility(SEIN_E_BUFF_ID)
+                    u.removeAbility(SEIN_E_SELF_BUFF_ID)
+            SEIN_E_BUFFMAP.put(u, cb)
+
+    

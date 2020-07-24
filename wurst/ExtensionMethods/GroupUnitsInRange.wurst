@@ -1,0 +1,164 @@
+package GroupUnitsInRange
+
+import Group
+
+int MAX_COLLISION = 197
+
+public function vec2.getEnemiesInRangeBoss(unit caster, real range) returns group
+    
+    group units = CreateGroup()
+    units.enumUnitsInRange(this, range)
+
+    for u in units
+        if not u.isEnemyOf(caster.getOwner())
+            units.removeUnit(u)
+
+    return units
+
+public function unit.getEnemiesInRangeBoss(real range) returns group
+    
+    group units = CreateGroup()
+    units.enumUnitsInRange(this.getPos(), range)
+
+    for u in units
+        if not u.isEnemyOf(this.getOwner())
+            units.removeUnit(u)
+
+    return units
+
+public function vec2.groupUnitsInRange(real range) returns group
+
+    group units = CreateGroup()
+    units.enumUnitsInRange(this, range)
+
+    return units
+
+public function vec2.getEnemiesInLine(
+    real angle,
+    unit owner,
+    int range) returns group
+
+    group enemies = CreateGroup()
+    vec2 currentPos
+    real distanceTraveled = 0
+
+    while distanceTraveled < range
+        currentPos = this.polarOffset(angle.fromDeg(), distanceTraveled)
+        var tempGroup = currentPos.getEnemiesInRange(currentPos, owner, 30)
+
+        enemies.addGroup(tempGroup)
+        distanceTraveled += 50
+
+        tempGroup.destr()
+        tempGroup = null
+
+    return enemies
+
+public function vec2.getAlliesInLine(
+    real angle,
+    unit owner,
+    int range) returns group
+
+    group enemies = CreateGroup()
+    vec2 currentPos
+    real distanceTraveled = 0
+
+    while distanceTraveled < range
+        currentPos = this.polarOffset(angle.fromDeg(), distanceTraveled)
+        var tempGroup = currentPos.getAlliesInRange(currentPos, owner, 30)
+
+        enemies.addGroup(tempGroup)
+        distanceTraveled += 50
+
+        tempGroup.destr()
+        tempGroup = null
+
+    return enemies
+
+public function vec2.getEnemiesInRange(vec2 thisVect, unit self, real range) returns group
+    var unitGroup = CreateGroup()
+    var tempRange = range+MAX_COLLISION
+    var dummy = createUnit(GetOwningPlayer(self), 'xdum', thisVect, 0 .fromDeg())
+
+    unitGroup.enumUnitsInRange(thisVect, tempRange)
+
+    for currentUnit in unitGroup
+        if(UnitIsEnemy(self, currentUnit) == false)
+            unitGroup.removeUnit(currentUnit)
+
+    for currentUnit in unitGroup
+        if(UnitIsInRange(dummy, currentUnit, range) == false)
+            unitGroup.removeUnit(currentUnit)
+
+    RemoveUnit(dummy)
+    dummy = null
+    return unitGroup
+
+public function vec2.getAlliesInRange(vec2 thisVect, unit self, real range) returns group
+    var unitGroup = CreateGroup()
+    var tempRange = range+MAX_COLLISION
+    var dummy = createUnit(GetOwningPlayer(self), 'xdum', thisVect, 0 .fromDeg())
+    //var dummy = createUnit(GetOwningPlayer(self), 'hfoo', thisVect, 0 .fromDeg())
+
+    unitGroup.enumUnitsInRange(thisVect, tempRange)
+
+    for currentUnit in unitGroup
+        if(UnitIsEnemy(self, currentUnit) == true)
+            unitGroup.removeUnit(currentUnit)
+
+    for currentUnit in unitGroup
+        if(UnitIsInRange(dummy, currentUnit, range) == false)
+            unitGroup.removeUnit(currentUnit)
+
+    RemoveUnit(dummy)
+    dummy = null
+    return unitGroup
+
+public function unit.getEnemiesInRange(unit self, real range) returns group
+    var unitGroup = CreateGroup()
+    var tempRange = range+MAX_COLLISION
+    unitGroup.enumUnitsInRange(self.getPos(), tempRange)
+
+    for currentUnit in unitGroup
+        if(UnitIsEnemy(self, currentUnit) == false)
+            unitGroup.removeUnit(currentUnit)
+
+        if(UnitIsInRange(self, currentUnit, range) == false)
+            unitGroup.removeUnit(currentUnit)
+            
+        if(currentUnit.isAlive() == false)
+            unitGroup.removeUnit(currentUnit)
+
+    return unitGroup
+
+public function unit.getAlliesInRange(unit self, real range) returns group
+    var unitGroup = CreateGroup()
+    var tempRange = range+MAX_COLLISION
+    unitGroup.enumUnitsInRange(self.getPos(), tempRange)
+
+    for currentUnit in unitGroup
+        if(UnitIsEnemy(self, currentUnit) == true)
+            unitGroup.removeUnit(currentUnit)
+
+    for currentUnit in unitGroup
+        if(UnitIsInRange(self, currentUnit, range) == false)
+            unitGroup.removeUnit(currentUnit)
+
+    return unitGroup
+
+public function unit.getUnitsInRange(unit self, real range) returns group
+    var unitGroup = CreateGroup()
+    unitGroup.enumUnitsInRange(self.getPos(), range + MAX_COLLISION_SIZE)
+
+    return unitGroup
+
+function UnitIsEnemy(unit target, unit otherUnit) returns boolean
+    if(IsUnitEnemy(target, GetOwningPlayer(otherUnit)) == true)
+        return true
+    return false
+
+function UnitIsInRange(unit target, unit otherUnit, real range) returns boolean
+    if(IsUnitInRange(target, otherUnit, range))
+        return true
+    else
+        return false

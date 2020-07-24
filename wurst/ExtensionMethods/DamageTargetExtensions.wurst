@@ -1,0 +1,60 @@
+package DamageTargetExtensions
+import GroupUnitsInRange
+
+public enum DamageTypeCustom
+  NONE
+  SPELL
+  IGNORED
+
+public DamageTypeCustom customDamageTypeMain = DamageTypeCustom.IGNORED
+
+public function unit.damageTargetEx(unit target, real amount, DamageTypeCustom customDamageType, boolean ignoreArmor)
+    
+    customDamageTypeMain = customDamageType
+
+    if customDamageType != DamageTypeCustom.IGNORED
+        if(ignoreArmor)
+            UnitDamageTarget(this, target, amount, false, false, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_UNIVERSAL, WEAPON_TYPE_WHOKNOWS)
+        else
+            UnitDamageTarget(this, target, amount, false, false, ATTACK_TYPE_CHAOS, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
+
+    if customDamageType == DamageTypeCustom.IGNORED
+        Log.info("Dealing ignored damage: " + amount.toString())
+
+        if(ignoreArmor)
+            UnitDamageTarget(this, target, amount, false, false, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_UNIVERSAL, WEAPON_TYPE_WHOKNOWS)
+        else
+            UnitDamageTarget(this, target, amount, false, false, ATTACK_TYPE_NORMAL, DAMAGE_TYPE_NORMAL, WEAPON_TYPE_WHOKNOWS)
+
+public function unit.damageTargetEnemyGroupEx(
+    real range, 
+    real damage, 
+    DamageTypeCustom customDamageType, 
+    boolean ignoreArmor)
+    
+    var enemies = this.getEnemiesInRangeBoss(range)
+
+    for u in enemies
+        this.damageTargetEx(u, damage, customDamageType, ignoreArmor)
+
+    enemies.clear()
+    enemies.destr()
+    enemies = null
+
+
+public function vec2.damageTargetEnemyGroupEx(
+    unit caster, 
+    real range, 
+    real damage, 
+    DamageTypeCustom customDamageType, 
+    boolean ignoreArmor)
+
+    var enemies = this.getEnemiesInRangeBoss(caster, range)
+
+    for u in enemies
+        caster.damageTargetEx(u, damage, customDamageType, ignoreArmor)
+
+    enemies.clear()
+    enemies.destr()
+    enemies = null
+

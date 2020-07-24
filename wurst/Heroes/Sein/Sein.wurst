@@ -1,0 +1,65 @@
+package Sein
+
+import ObjectIdGenerator
+import UnitIds
+import UnitObjEditing
+import ObjectIds
+import SeinQObjects
+import SeinWObjects
+import SeinEObjects
+import SeinRObjects
+import SeinPassiveObjects
+import StatLevelingSpellBook
+
+public constant SEIN_ID = compiletime(HERO_ID_GEN.next())
+
+@compiletime function createUnit()
+    new HeroDefinition(SEIN_ID, UnitIds.blademaster)
+    ..setName("Waifu Paladin")
+    ..setProperNames("Sein")
+    ..setProperNamesUsed(1)
+    ..setIconGameInterface("ReplaceableTextures\\CommandButtons\\BTNElvenFarm.blp")
+    ..setIconScoreScreen("")
+    ..setModelFile("sein.mdx")
+    ..setMovementType(MovementType.Foot)
+    ..setRace(Race.Human)
+    ..setNormalAbilities(commaList("AInv".fromRawCode(), SEIN_PASSIVE_ID, STALEVELSPELLBOOK_ID))
+    ..setTurnRate(3.0)
+    ..setAgilityPerLevel(0)
+    ..setStrengthPerLevel(0)
+    ..setIntelligencePerLevel(0)
+    ..setFoodCost(0)
+    ..setHitPointsMaximumBase(1200)
+    ..setHitPointsRegenerationRate(0)
+    ..setManaInitialAmount(200)
+    ..setManaMaximum(200)
+    ..setManaRegeneration(0)
+    ..setStartingAgility(0)
+    ..setStartingStrength(0)
+    ..setStartingIntelligence(0)
+    ..setFoodCost(0)
+    ..setAttack1CooldownTime(1.00)
+    ..setAttack1DamageBase(30)
+    ..setAttacksEnabled(1)
+    ..setSpeedBase(310)
+    ..setCollisionSize(1)
+    ..setRace(Race.Human)
+    ..setArmorType(ArmorType.Hero)
+    ..setAnimationBlendTimeseconds(0.0)
+    ..setAnimationCastBackswing(0.0)
+    ..setMaximumPitchAngledegrees(0.0)
+    ..setMaximumRollAngledegrees(0.0)
+    ..setSightRadiusDay(1000)
+    ..setSightRadiusNight(1000)
+    ..setPropulsionWindowdegrees(1.0)
+    ..setUnitClassification("_")
+    ..hideHeroDeathMsg(false)
+    ..setScalingValue(.65)
+    ..setHeroAbilities(commaList(SEINQ_ID, SEIN_W_ID, SEIN_E_ID, SEIN_R_ID))
+    ..setDefenseBase(0)
+    ..setPrimaryAttribute("STR")
+    ..setAttack1AnimationBackswingPoint(.1)
+    ..setAttack1AnimationDamagePoint(.1)
+    ..setAttack1WeaponSound(WeaponSound.MetalHeavySlice)
+    ..setAttack1DamageSidesperDie(1)
+    ..setAttack1DamageNumberofDice(1)

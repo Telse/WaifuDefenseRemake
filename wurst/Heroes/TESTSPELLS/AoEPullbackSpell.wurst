@@ -1,0 +1,56 @@
+package AoEPullbackSpell
+import ObjectIdGenerator
+import ChannelAbilityPreset
+import Icons
+import RegisterEvents
+import Knockback3
+import GroupUnitsInRange
+import ClosureTimers
+
+// var enemies = caster.getEnemiesInRange(caster, 1000)
+
+// for u in enemies
+//     var newPos = center.angleTo(u.getPos()) + 180 .fromDeg()
+//     Knockback3.add(u, 2000., newPos, 90 .fromDeg())
+//     //var randomVec = caster.getPos().getRandomVecAroundVec(caster.getPos(), 100)
+//     //u.setPos(randomVec)
+
+public constant TEST_SPELL_ID = compiletime(ABIL_ID_GEN.next())
+public int Range = 50
+
+
+@compiletime function CreateTestAoeSpell()
+    new ChannelAbilityPreset(TEST_SPELL_ID, 5, true)
+        ..setHeroAbility(false)
+        ..presetHotkey("Z")
+        ..setName("TEST AOE")
+        ..setButtonPositionNormalX(0)
+        ..setButtonPositionNormalY(2)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, "Test aoe circles")
+        ..setTooltipNormalExtended(1, "Test Aoe Circles")
+        ..presetTargetTypes(Targettype.POINT)
+        ..setLevels(1)
+        ..presetManaCost(lvl -> 0)
+        ..presetCooldown(lvl -> 2)
+        ..presetIcon(Icons.bTNBreathOfFire)
+
+
+init  
+    registerSpellEffectEvent(TEST_SPELL_ID) ->
+        var tu = GetTriggerUnit()
+        var enemies = tu.getAlliesInRange(tu, 1000)
+        enemies.removeUnit(tu)
+
+        for u in enemies
+            var newPos = tu.getPos().angleTo(u.getPos()) + 180 .fromDeg()
+            Knockback3.add(u, 4000., newPos, 90 .fromDeg())
+            //var randomVec = caster.getPos().getRandomVecAroundVec(caster.getPos(), 100)
+            //u.setPos(randomVec)
+
+        doAfter(.2) ->
+            for u in enemies
+                var newPos = tu.getPos().angleTo(u.getPos())
+                Knockback3.setVel(u, 0, newPos, newPos)
+                Knockback3.add(u, 4000., newPos, newPos)

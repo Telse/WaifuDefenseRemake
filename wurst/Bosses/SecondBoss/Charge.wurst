@@ -1,0 +1,95 @@
+package Charge
+import ISpell
+import GroupUnitsInRange
+import ClosureTimers
+import Abilities
+import DamageTargetExtensions
+import BossHelpers
+
+public class Charge implements ISpell
+
+    bool caster2Collision = false
+    bool _internalPauseTimer = true
+    real _pauseTime = 5.75
+    string _name = "Charge"
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+    
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+        var enemies = caster.getEnemiesInRangeBoss(1500)
+        var target = enemies.getRandomUnit()
+        caster2Collision = false
+
+        var initialZ = caster.getLocalZ()
+
+        doPeriodicallyCounted(1, 5) cb ->
+            var targetPos = target.getPos()
+            flashEffect(Abilities.warStompCaster, target, "origin")
+            var casterVec = caster.getPos()
+            var angle = casterVec.angleTo(targetPos)
+
+            flashEffect(Abilities.warStompCaster, caster.getPos())
+            caster.setFacing(angle)
+
+        doAfter(5.1) ->
+            real distance = caster.getPos().distanceTo(target.getPos())
+            var angle = caster.getPos().angleTo(target.getPos())
+
+            doPeriodicallyCounted(.03, 20) cb ->
+
+                bool pathable = IsPathable(caster, initialZ)
+
+                if(pathable == false and target != null and caster2Collision == false)
+                    if(distance >100)
+                        var newTargetPos = caster.getPos().polarOffset(angle, 100) 
+                        caster.setX(newTargetPos.x)
+                        caster.setY(newTargetPos.y)
+                        distance -= 100
+                    else
+                        var newTargetPos = caster.getPos().polarOffset(angle, distance) 
+                        caster.setX(newTargetPos.x)
+                        caster.setY(newTargetPos.y)
+                        distance = 0
+
+                        var enemiestoDamage = caster.getEnemiesInRangeBoss(300)
+                        flashEffect(Abilities.thunderclapCaster, caster.getPos())
+            
+                        for u in enemiestoDamage
+                            SetUnitTimeScalePercent(caster, 500)
+                            caster.setAnimation("Attack Slam")
+                            caster.damageTargetEx(u, 30, DamageTypeCustom.SPELL, false)
+                            SetBossAoeIndicator(caster.getPos(), 275, .2)
+
+                else
+                    if(caster2Collision == false and target != null)
+                        caster.damageTargetEx(caster, 300, DamageTypeCustom.SPELL, true)
+                        caster2Collision = true
+                        caster.setPos(caster.getPos().polarOffset(angle+180 .fromDeg(), 150))
+                        SetUnitTimeScalePercent(caster, 100)
+                        caster.setAnimation("Death")
+
+        doAfter(5.75) ->
+            if caster2Collision == false
+                SetUnitTimeScalePercent(caster, 100)
+                caster.setAnimation("Stand")
+                caster.unpause()
+        
+        doAfter(8.5) ->
+            if caster2Collision == true
+                caster.unpause()
+                caster.setAnimation("Stand")
+                
+function IsPathable(unit caster, real initialZ) returns bool
+    var currentZ = caster.getLocalZ()
+    
+    if currentZ < (initialZ + 30)
+        return false
+    
+    return true

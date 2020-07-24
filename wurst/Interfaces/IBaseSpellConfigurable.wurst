@@ -1,0 +1,23 @@
+package IBaseSpellConfigurable
+
+import public Assets
+
+public interface IBaseSpellConfigurable
+    @configurable public real BASE_DAMAGE 
+    @configurable public real BONUS_DAMAGE 
+
+    @configurable public string  SPELL_EFFECT_PATH 
+    @configurable public string BONUS_EFFECT_PATH 
+    @configurable public real SPELL_EFFECT_DURATION
+    @configurable public real SPELL_RADIUS 
+
+    @configurable public string SPELL_ICON 
+    @configurable public string SPELL_NAME 
+    @configurable public string SPELL_TT_NORMAL 
+    @configurable public string SPELL_TT_EXTENDED 
+
+    @configurable public real BUFF_DURATION 
+    @configurable public string BUFF_EFFECT_PATH 
+
+    @configurable public string BUFF_NAME 
+    @configurable public string BUFF_TT 

@@ -1,0 +1,14 @@
+package TEMPFrameHolder
+
+public class TEMPFrameHandleHolder
+    framehandle _fh
+    string _frameName
+    int _index
+
+    construct(
+        framehandle fh,
+        string frameName,
+        int index)
+        _fh = fh
+        _frameName = frameName
+        _index = index 

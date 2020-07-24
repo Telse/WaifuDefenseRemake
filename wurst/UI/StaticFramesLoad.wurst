@@ -1,0 +1,201 @@
+package StaticFramesLoad
+import ClosureTimers
+import PlayerEvents
+import TEMPFrameHolder
+import PlayerStatsHashtable
+import IncreaseCritChance
+import IncreaseCritDamage
+import IncreaseSpellDamage
+import Bar
+import UiSelectionConstants
+
+public framehandle damageFrame
+public framehandle damageBackdrop
+
+public framehandle armorFrame
+public framehandle armorBackdrop
+
+public framehandle strengthFrame
+public framehandle strengthBackdrop
+
+public framehandle agilityFrame
+public framehandle agilityBackdrop
+
+public framehandle intelligenceFrame
+public framehandle intelligenceBackdrop
+
+public framehandle critFrame
+public framehandle critBackdrop
+
+public framehandle critDamageFrame
+public framehandle critDamageBackdrop
+
+public framehandle spellDamageFrame
+public framehandle spellDamageBackdrop
+
+public framehandle goldFrame
+public framehandle statPointFrame
+
+function CreateCustomFrame(
+    real x, 
+    real y,
+    string hashKey) returns framehandle
+    var origin = getOriginFrame(ORIGIN_FRAME_GAME_UI, 0)
+    var parent = BlzCreateFrame("StandardMenuTinyButtonBaseBackdrop", origin, 0, 0)
+
+    parent.setText("0%")
+    parent.setAbsPoint(FRAMEPOINT_BOTTOM, x, y)
+    parent.show()
+    parent.setSize(.035, .02)
+    parent.setTextSizeLimit(30)
+
+    origin = null
+
+    return parent
+
+function CreateStatFrame(
+    string elementName, 
+    int index, 
+    real x, 
+    real y) returns framehandle
+
+    var origin = getOriginFrame(ORIGIN_FRAME_GAME_UI, 0)
+    var parent = BlzCreateFrame("StandardMenuTinyButtonBaseBackdrop", origin, 0, 0)
+    var fh = getFrameByName(elementName, index)
+
+    var value = fh.getText()
+
+    parent.setText(value)
+    parent.setAbsPoint(FRAMEPOINT_BOTTOM, x, y)
+    parent.show()
+    parent.setSize(.035, .02)
+    parent.setTextSizeLimit(30)
+
+    origin = null
+    fh = null
+
+    return parent
+
+
+function CreateBackdropImages(    
+    string elementName, 
+    int index, 
+    real x, 
+    real y) returns framehandle
+
+    var origin = getOriginFrame(ORIGIN_FRAME_GAME_UI, 0)
+    var parent = BlzCreateFrame(elementName, origin, 0, 0)
+    
+    parent.setAbsPoint(FRAMEPOINT_BOTTOM, x, y)
+    parent.show()
+    parent.setSize(.015, .015)
+
+    origin = null
+    return parent
+
+
+public function HidePlayerStats()
+    damageFrame.hide()
+    damageBackdrop.hide()
+
+    armorFrame.hide()
+    armorBackdrop.hide()
+
+    strengthFrame.hide()
+    strengthBackdrop.hide()
+
+    agilityFrame.hide()
+    agilityBackdrop.hide()
+    
+    intelligenceFrame.hide()
+    intelligenceBackdrop.hide()
+
+    critFrame.hide()
+    critBackdrop.hide()
+
+    critDamageFrame.hide()
+    critDamageBackdrop.hide()
+
+    spellDamageFrame.hide()
+    spellDamageBackdrop.hide()
+
+    HpBar.parent.hide()
+    ManaBar.parent.hide()
+
+
+public function ShowPlayerStats()
+    damageFrame.show()
+    damageBackdrop.show()
+
+    armorFrame.show()
+    armorBackdrop.show()
+
+    strengthFrame.show()
+    strengthBackdrop.show()
+
+    agilityFrame.show()
+    agilityBackdrop.show()
+    
+    intelligenceFrame.show()
+    intelligenceBackdrop.show()
+
+    critFrame.show()
+    critBackdrop.show()
+
+    critDamageFrame.show()
+    critDamageBackdrop.show()
+
+    spellDamageFrame.show()
+    spellDamageBackdrop.show()
+
+    HpBar.parent.show()
+    ManaBar.parent.show()
+
+init
+    doAfter(.2) ->
+        Log.info("Setting static stat frames.")
+        damageBackdrop = CreateBackdropImages("AttackDamageBackdrop", 6, .09, .08)
+        armorBackdrop = CreateBackdropImages("ArmorBackdrop", 6, .15, .08)
+        strengthBackdrop =  CreateBackdropImages("StrengthBackdrop", 6, .09, .06)
+        agilityBackdrop = CreateBackdropImages("AgilityBackdrop", 6, .15, .06)
+        intelligenceBackdrop = CreateBackdropImages("IntelligenceBackdrop", 6, .09, .04)
+        critBackdrop =  CreateBackdropImages("CritBackdrop", 0, .15, .04)
+        critDamageBackdrop = CreateBackdropImages("CritDamageBackdrop", 0, .09, .02)
+        spellDamageBackdrop =  CreateBackdropImages("SpellDamageBackdrop", 0, .15, .02)
+        CreateBackdropImages("GoldBackdrop", 6, .65, .56)
+        CreateBackdropImages("StatpointBackdrop", 0, .75, .56)
+
+        //Attack damage
+        damageFrame = CreateStatFrame("InfoPanelIconValue", 0, .12, .07)
+        //Armor
+        armorFrame =  CreateStatFrame("InfoPanelIconValue", 2, .18, .07)
+        //Strength
+        strengthFrame =  CreateStatFrame("InfoPanelIconHeroStrengthValue", 6, .12, .05)
+        //Agility
+        agilityFrame = CreateStatFrame("InfoPanelIconHeroAgilityValue", 6, .18, .05)
+        //Intellect
+        intelligenceFrame = CreateStatFrame("InfoPanelIconHeroIntellectValue", 6, .12, .03)
+        //Crit chance
+        critFrame = CreateCustomFrame(.18, .03, critChanceHashKey)
+        //Crit damage
+        critDamageFrame = CreateCustomFrame(.12, .01, critDamageHashKey)
+        //Spell Damage
+        spellDamageFrame = CreateCustomFrame(.18, .01, spellDamageHashKey)
+        //Gold
+        goldFrame = CreateStatFrame("ResourceBarGoldText", 0, .68, .55)
+        //Lumber
+        statPointFrame = CreateStatFrame("ResourceBarLumberText", 0, .78, .55)
+
+        HpBar = new Bar(
+            vec2(.41, .042), 
+            .2, 
+            .01, 
+            PLAYER_COLOR_NAMES[6].toPlayerColor())
+
+        ManaBar = new Bar(
+            vec2(.41, .03), 
+            .2, 
+            .01, 
+            PLAYER_COLOR_NAMES[1].toPlayerColor())
+        
+        HidePlayerStats()

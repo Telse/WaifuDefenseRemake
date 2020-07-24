@@ -1,0 +1,32 @@
+package AbilityTooltipsHelpers
+
+public function GenerateSpellName(string str) returns string
+    return "|c007e7eff" + str +"|r"
+
+
+public function GenerateSpellBody(string str) returns string
+    var newstring = ReplaceActiveText(str)
+    newstring = ReplacePassiveText(newstring)
+    newstring = ReplaceIntelligence(newstring)
+    newstring = ReplaceAgility(newstring)
+    newstring = ReplaceStrength(newstring)
+
+    return newstring
+
+function RegexSpellDescriptors(string str)
+
+
+function ReplaceActiveText(string str) returns string
+    return str.replace("[Active]","|c00e7eb00[Active]|r" )
+
+function ReplacePassiveText(string str) returns string
+    return str.replace("[Passive]","|c00f700ff[Passive]|r" )
+
+function ReplaceIntelligence(string str) returns string
+    return str.replace("INT","|c0000eeffINT|r" )
+
+function ReplaceAgility(string str) returns string
+    return str.replace("AGI","|c0000ff37AGI|r" )
+
+function ReplaceStrength(string str) returns string
+    return str.replace("STR","|c00ff0000STR|r" )

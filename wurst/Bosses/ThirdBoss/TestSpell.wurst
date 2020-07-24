@@ -1,0 +1,107 @@
+package TestSpell
+import ISpell
+import BossHelpers
+import GroupUnitsInRange
+import ClosureTimers
+import Abilities
+import DamageTargetExtensions
+import GroupExtensions
+import Knockback3
+
+public class TestSpell implements ISpell
+
+    bool _internalPauseTimer = false
+    real _pauseTime = 8.5
+    string _name = "TestSpell"
+
+    real reactTime = 1.5
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+
+        // SetUnitTimeScalePercent(caster, 40)
+
+        doPeriodicallyTimed(1.5, 7.5)  cb ->
+            var chance = GetRandomInt(0, 1)
+            var temp = caster.getClosestEnemyToUnit(5000)
+            var angle = caster.getPos().angleTo(temp.getPos())
+
+            Knockback3.add(caster, 1000., angle, 90 .fromDeg())
+
+            if caster.isAlive()
+                if(chance == 0)
+                    castSwipe(caster, angle)
+                else
+                    castSlice(caster, angle)
+
+            temp = null
+    
+        doAfter(_pauseTime) () ->
+            SetUnitTimeScalePercent(caster, 100)
+            
+    function castSwipe(unit caster, angle angle)
+        var newPos = caster.getPos().polarOffset(angle, 450)
+        var newPos2 = caster.getPos().polarOffset(angle + 45 .fromDeg(), 450)
+        var newPos3 = caster.getPos().polarOffset(angle - 45 .fromDeg(), 450)
+
+        caster.setFacing(angle)
+        caster.setAnimation(18)
+
+        SetBossAoeIndicator(newPos, 150, reactTime)
+        SetBossAoeIndicator(newPos2, 150, reactTime)
+        SetBossAoeIndicator(newPos3, 150, reactTime)
+
+        doAfter(1.3) () ->
+            var enemies = newPos.getEnemiesInRangeBoss(caster, 150)
+            enemies.addGroup(newPos2.getEnemiesInRangeBoss(caster, 150))
+            enemies.addGroup(newPos3.getEnemiesInRangeBoss(caster, 150))
+
+            for u in enemies
+                caster.damageTargetEx(u, 200, DamageTypeCustom.SPELL, false)
+
+            enemies.clear()
+            enemies.destr()
+            enemies = null
+
+            flashEffect(Abilities.thunderclapCaster, newPos)
+            flashEffect(Abilities.thunderclapCaster, newPos2)
+            flashEffect(Abilities.thunderclapCaster, newPos3)
+            
+
+    function castSlice(unit caster, angle angle)
+        var newPos =  caster.getPos().polarOffset(angle, 300)
+        var newPos2 = caster.getPos().polarOffset(angle, 450)
+        var newPos3 = caster.getPos().polarOffset(angle, 600)
+
+        caster.setFacing(angle)
+        caster.setAnimation(10)
+
+        SetBossAoeIndicator(newPos, 150, reactTime)
+        SetBossAoeIndicator(newPos2, 150, reactTime)
+        SetBossAoeIndicator(newPos3, 150, reactTime)
+
+        doAfter(1.3) () ->
+            var enemies = newPos.getEnemiesInRangeBoss(caster, 150)
+            enemies.addGroup(newPos2.getEnemiesInRangeBoss(caster, 150))
+            enemies.addGroup(newPos3.getEnemiesInRangeBoss(caster, 150))
+
+            for u in enemies
+                caster.damageTargetEx(u, 200, DamageTypeCustom.SPELL, false)
+
+            enemies.clear()
+            enemies.destr()
+            enemies = null
+
+            flashEffect(Abilities.thunderclapCaster, newPos)
+            flashEffect(Abilities.thunderclapCaster, newPos2)
+            flashEffect(Abilities.thunderclapCaster, newPos3)
+
+

@@ -1,0 +1,59 @@
+package Remilia
+
+import Assets
+import ChannelAbilityPreset
+import RemiliaE
+import RemiliaQ
+import RemiliaRObjects
+import RemiliaW
+import StatLevelingSpellBook
+
+public constant REMILIA_ID = compiletime(HERO_ID_GEN.next())
+
+
+@compiletime function createUnit()
+    new HeroDefinition(REMILIA_ID, UnitIds.bloodmage)
+    ..setName("Scarlet Devil")
+    ..setProperNames("Remilia Scarlet")
+    ..setProperNamesUsed(1)
+    ..setIconGameInterface("ReplaceableTextures\\CommandButtons\\BTNElvenFarm.blp")
+    ..setIconScoreScreen("")
+    ..setModelFile("war3mapImported\\Remilia.mdx")
+    ..setMovementType(MovementType.Foot)
+    ..setRace(Race.Human)
+    ..setNormalAbilities(commaList("AInv".fromRawCode(), STALEVELSPELLBOOK_ID))
+    ..setTurnRate(3.0)
+    ..setAgilityPerLevel(0)
+    ..setStrengthPerLevel(0)
+    ..setIntelligencePerLevel(0)
+    ..setFoodCost(0)
+    ..setHitPointsMaximumBase(800)
+    ..setHitPointsRegenerationRate(0)
+    ..setManaMaximum(1200)
+    ..setManaInitialAmount(1200)
+    ..setManaRegeneration(0)
+    ..setStartingAgility(0)
+    ..setStartingStrength(0)
+    ..setStartingIntelligence(0)
+    ..setFoodCost(0)
+    ..setAttack1CooldownTime(2.00)
+    ..setAttack1DamageBase(20)
+    ..setAttacksEnabled(1)
+    ..setSpeedBase(300)
+    ..setCollisionSize(1)
+    ..setRace(Race.Human)
+    ..setArmorType(ArmorType.Hero)
+    ..setAnimationBlendTimeseconds(0.0)
+    ..setAnimationCastBackswing(0.0)
+    ..setMaximumPitchAngledegrees(0.0)
+    ..setMaximumRollAngledegrees(0.0)
+    ..setSightRadiusDay(1000)
+    ..setSightRadiusNight(1000)
+    ..setPropulsionWindowdegrees(1.0)
+    ..setUnitClassification("_")
+    ..hideHeroDeathMsg(false)
+    ..setScalingValue(.65)
+    ..setHeroAbilities(commaList(REMILIAQ_ID, REMILIAW_ID, REMILIAE_ID, REMILIAR_ID))
+    ..setDefenseBase(0)
+    ..setAttack1DamageSidesperDie(1)
+    ..setAttack1DamageNumberofDice(1)

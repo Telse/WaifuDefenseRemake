@@ -1,0 +1,9 @@
+package SpellDamageCalculationExtensions
+
+public function unit.calculateSpellDamage(real strMultiplier, real agiMultiplier, real intMultiplier, real baseDamage, int spellId) returns real
+    var strDamage = this.getStr(true) * strMultiplier
+    var intDamage = this.getInt(true) * intMultiplier
+    var agiDamage = this.getAgi(true) * agiMultiplier
+    var fullBaseDamage = baseDamage * this.getAbilityLevel(spellId)
+
+    return (strDamage + intDamage + agiDamage + fullBaseDamage) 

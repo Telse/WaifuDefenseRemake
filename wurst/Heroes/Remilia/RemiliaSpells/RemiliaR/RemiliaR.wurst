@@ -1,0 +1,67 @@
+package RemiliaR
+import ClosureEvents
+import RemiliaRObjects
+import RemiliaRConstants
+import ClosureTimers
+import HashMap
+import GroupUnitsInRange
+import BuffObjEditing
+import Remilia
+import HealUnit
+import DamageTargetExtensions
+import SpellDamageCalculationExtensions
+import GameSystemConstants
+
+let buffId = REMILIA_R_DUMMY_BUFF.abilId
+let buffMap = new HashMap<unit, CallbackSingle>
+
+public function RemiliaRVamp(unit attacker, real damage)
+    if(attacker.hasAbility(buffId))
+        var remilia = PlayerUnits.filter(t -> t.getTypeId() == REMILIA_ID).getFirst()
+        var healAmount = damage * (remilia.getAbilityLevel(REMILIAR_ID) * .05)
+
+        var allies = attacker.getAlliesInRange(attacker, 500)
+        for u in allies
+            remilia.healUnit(remilia, healAmount, u)
+
+        allies.destr()
+        allies = null
+
+init
+    registerSpellEffectEvent(REMILIAR_ID)->
+        var tU = GetTriggerUnit()
+        var spellPos = tU.getPos()
+        var eff = AddSpecialEffect(SPELL_EFFECT_PATH, tU.getX() , tU.getY())
+        var allies = tU.getAlliesInRange(tU, SPELL_RADIUS)
+        var damage = tU.calculateSpellDamage(STRENGTH_MULTIPLIER,
+        AGI_MULTIPLIER,
+        INT_MULTIPLIER,
+        BASE_DAMAGE,
+        REMILIAR_ID)
+
+        var dummy = createUnit(GetOwningPlayer(tU), 'xdum', spellPos, 0 .fromDeg())
+
+        eff.setScale(2.5)
+
+        doPeriodicallyCounted(1, BUFF_DURATION.toInt()) cb ->
+            var enemies = spellPos.getEnemiesInRange(spellPos, dummy, SPELL_RADIUS)
+
+            for u in enemies
+                tU.damageTargetEx(u, damage, DAMAGE_TYPE, false)
+                flashEffect(SECOND_SPELL_EFFECT_PATH, u.getPos())
+            
+            enemies.clear()
+
+        for u in allies
+            u.addAbility(buffId)
+
+            let cb = doAfter(BUFF_DURATION) ->
+                if buffMap.has(u)
+                    buffMap.remove(u)
+                    u.removeAbility(buffId)
+            buffMap.put(u, cb)
+        
+        doAfter(BUFF_DURATION +.5)->
+            eff.destr()
+            dummy.remove()
+            dummy=null

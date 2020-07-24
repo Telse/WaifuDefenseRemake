@@ -1,0 +1,293 @@
+package DreamsOfIce
+import ISpell
+import BossHelpers
+import ClosureTimers
+import AbilityObjEditing
+import ObjectIdGenerator
+import GroupUnitsInRange
+import GroupExtensions
+import Abilities
+import DamageTargetExtensions
+
+public constant DREAMS_ICE_DUMMY_UNIT = compiletime(UNIT_ID_GEN.next())
+
+@compiletime function CreateFrozenCoffinDummy()
+    new UnitDefinition(DREAMS_ICE_DUMMY_UNIT, 'hfoo')
+    ..setName("Gungnir")
+    ..setIconGameInterface("ReplaceableTextures\\CommandButtons\\BTNElvenFarm.blp")
+    ..setModelFile("WaterCrystal.mdx")
+    ..setMovementType(MovementType.Foot)
+    ..setRace(Race.Human)
+    ..setAttacksEnabled(0)
+    ..setSpeedBase(0)
+    ..setManaInitialAmount(0)
+    ..setManaMaximum(0)
+    ..setManaRegeneration(0)
+    //..setNormalAbilities()
+    ..setShadowImageCenterX(0)
+    ..setShadowImageCenterY(0)
+    ..setShadowImageUnit("")
+    ..setShadowImageHeight(0)
+    ..setShadowImageWidth(0)
+    ..setCollisionSize(0)
+    ..setFoodCost(0)
+    ..setSightRadiusDay(0)
+    ..setSightRadiusNight(0)
+    ..setHitPointsMaximumBase(500)
+    ..setScalingValue(5)
+    ..setSelectionScale(3)
+
+
+public class DreamsOfIce implements ISpell
+
+    bool _internalPauseTimer = false
+    real _pauseTime = 20
+    string _name = "Dreams of Ice"
+
+    real localRange = 100
+    real finalExplosionDamage = 10
+    real crystalExplosionDamage = 80
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+
+        var center = gg_rct_Boss1StageArea.getCenter()
+        caster.setPos(center)
+        var casterPos = caster.getPos()
+
+        var north = casterPos.polarOffset(90 .fromDeg(), 600)
+        var south = casterPos.polarOffset(180 .fromDeg(), 600)
+        var east = casterPos.polarOffset(270 .fromDeg(), 600)
+        var west = casterPos.polarOffset(360 .fromDeg(), 600)
+
+        var northU = createUnit(caster.getOwner(), DREAMS_ICE_DUMMY_UNIT, north, 0 .fromDeg())
+        var southU = createUnit(caster.getOwner(), DREAMS_ICE_DUMMY_UNIT, south, 0 .fromDeg())
+        var eastU = createUnit(caster.getOwner(), DREAMS_ICE_DUMMY_UNIT, east, 0 .fromDeg())
+        var westU = createUnit(caster.getOwner(), DREAMS_ICE_DUMMY_UNIT, west, 0 .fromDeg())
+
+        localRange = 100
+
+        doPeriodicallyTimed(2, 20) cb->
+            vec2 tempPos
+            if northU.isAlive()
+                var enemies = northU.getEnemiesInRangeBoss(800)
+                var targetUnit = enemies.getClosestEnemyToPoint(northU.getPos())
+                var spellPos = targetUnit.getPos()
+
+                enemies.destr()
+                enemies = null
+                targetUnit = null
+
+                SetBossAoeIndicatorColored(spellPos, 100, 1, 0, 0, 255)
+                doAfter(1) ->
+                    if caster.isAlive()
+                        flashEffect(Abilities.frostNovaTarget,spellPos)
+                        var damageEnemies = spellPos.getEnemiesInRangeBoss(caster, 100)
+
+                        for u in damageEnemies 
+                            caster.damageTargetEx(u, crystalExplosionDamage, DamageTypeCustom.SPELL, false)
+
+                        damageEnemies.destr()
+                        damageEnemies = null
+                    else
+                        northU.kill()
+                        northU.remove()
+
+            if southU.isAlive()
+                var enemies = southU.getEnemiesInRangeBoss(800)
+                var targetUnit = enemies.getClosestEnemyToPoint(southU.getPos())
+                var spellPos = targetUnit.getPos()
+
+                enemies.destr()
+                enemies = null
+                targetUnit = null
+
+                SetBossAoeIndicatorColored(spellPos, 100, 1, 0, 0, 255)
+                doAfter(1) ->
+                    if caster.isAlive()
+                        flashEffect(Abilities.frostNovaTarget,spellPos)
+                        var damageEnemies = spellPos.getEnemiesInRangeBoss(caster, 100)
+
+                        for u in damageEnemies 
+                            caster.damageTargetEx(u, crystalExplosionDamage, DamageTypeCustom.SPELL, false)
+
+                        damageEnemies.destr()
+                        damageEnemies = null
+                    else
+                        southU.kill()
+                        southU.remove()
+            
+            if eastU.isAlive()
+                var enemies = eastU.getEnemiesInRangeBoss(800)
+                var targetUnit = enemies.getClosestEnemyToPoint(eastU.getPos())
+                var spellPos = targetUnit.getPos()
+
+                enemies.destr()
+                enemies = null
+                targetUnit = null
+
+                SetBossAoeIndicatorColored(spellPos, 100, 1, 0, 0, 255)
+                doAfter(1) ->
+                    if caster.isAlive()
+                        flashEffect(Abilities.frostNovaTarget,spellPos)
+                        var damageEnemies = spellPos.getEnemiesInRangeBoss(caster, 100)
+
+                        for u in damageEnemies 
+                            caster.damageTargetEx(u, crystalExplosionDamage, DamageTypeCustom.SPELL, false)
+
+                        damageEnemies.destr()
+                        damageEnemies = null
+                    else
+                        eastU.kill()
+                        eastU.remove()
+            
+            if westU.isAlive()
+                var enemies = westU.getEnemiesInRangeBoss(800)
+                var targetUnit = enemies.getClosestEnemyToPoint(westU.getPos())
+                var spellPos = targetUnit.getPos()
+
+                enemies.destr()
+                enemies = null
+                targetUnit = null
+
+                SetBossAoeIndicatorColored(spellPos, 100, 1, 0, 0, 255)
+                doAfter(1) ->
+                    if caster.isAlive()
+                        flashEffect(Abilities.frostNovaTarget,spellPos)
+                        var damageEnemies = spellPos.getEnemiesInRangeBoss(caster, 100)
+
+                        for u in damageEnemies 
+                            caster.damageTargetEx(u, crystalExplosionDamage, DamageTypeCustom.SPELL, false)
+
+                        damageEnemies.destr()
+                        damageEnemies = null
+                    else
+                        westU.kill()
+                        westU.remove()
+            
+
+        doPeriodicallyTimed(.03, 20) cb ->
+            if northU.isAlive()
+                SetBossAoeIndicatorColored(north, localRange.toInt(), .03, 255, 0, 0)
+
+            if southU.isAlive()
+                SetBossAoeIndicatorColored(south, localRange.toInt(), .03, 255, 0, 0)
+            
+            if eastU.isAlive()
+                SetBossAoeIndicatorColored(east, localRange.toInt(), .03, 255, 0, 0)
+            
+            if westU.isAlive()
+                SetBossAoeIndicatorColored(west, localRange.toInt(), .03, 255, 0, 0)
+
+            localRange += 2.5
+
+        doAfter(20) ->
+            if northU.isAlive()
+
+                var enemies = northU.getEnemiesInRangeBoss(localRange)
+
+                var eff = AddSpecialEffect("FrostNova.mdx", northU.getPos().x, northU.getPos().y)
+                eff.setScale(2.5)
+                eff.destr()
+    
+                eff = AddSpecialEffect("FrostNova.mdx", northU.getPos().x, northU.getPos().y)
+                eff.setScale(2.5)
+                eff.destr()
+    
+                eff = AddSpecialEffect("FrostNova.mdx", northU.getPos().x, northU.getPos().y)
+                eff.setScale(2.5)
+                eff.destr()
+    
+                eff = AddSpecialEffect("FrostNova.mdx", northU.getPos().x, northU.getPos().y)
+                eff.setScale(2.5)
+                eff.destr()
+
+                for u in enemies 
+                    caster.damageTargetEx(u, finalExplosionDamage, DamageTypeCustom.SPELL, false)
+
+            if southU.isAlive()
+
+                var enemies = southU.getEnemiesInRangeBoss(localRange)
+
+                var eff = AddSpecialEffect("FrostNova.mdx", southU.getPos().x, southU.getPos().y)
+                eff.setScale(2.5)
+                eff.destr()
+    
+                eff = AddSpecialEffect("FrostNova.mdx", southU.getPos().x, southU.getPos().y)
+                eff.setScale(2.5)
+                eff.destr()
+    
+                eff = AddSpecialEffect("FrostNova.mdx", southU.getPos().x, southU.getPos().y)
+                eff.setScale(2.5)
+                eff.destr()
+    
+                eff = AddSpecialEffect("FrostNova.mdx", southU.getPos().x, southU.getPos().y)
+                eff.setScale(2.5)
+                eff.destr()
+
+                for u in enemies 
+                    caster.damageTargetEx(u, finalExplosionDamage, DamageTypeCustom.SPELL, false)
+            
+            if eastU.isAlive()
+                var enemies = eastU.getEnemiesInRangeBoss(localRange)
+
+                var eff = AddSpecialEffect("FrostNova.mdx", eastU.getPos().x, eastU.getPos().y)
+                eff.setScale(2.5)
+                eff.destr()
+    
+                eff = AddSpecialEffect("FrostNova.mdx", eastU.getPos().x, eastU.getPos().y)
+                eff.setScale(2.5)
+                eff.destr()
+    
+                eff = AddSpecialEffect("FrostNova.mdx", eastU.getPos().x, eastU.getPos().y)
+                eff.setScale(2.5)
+                eff.destr()
+    
+                eff = AddSpecialEffect("FrostNova.mdx", eastU.getPos().x, eastU.getPos().y)
+                eff.setScale(2.5)
+                eff.destr()
+
+                for u in enemies 
+                    caster.damageTargetEx(u, finalExplosionDamage, DamageTypeCustom.SPELL, false)
+            
+            if westU.isAlive()
+                var enemies = westU.getEnemiesInRangeBoss(localRange)
+
+                var eff = AddSpecialEffect("FrostNova.mdx", westU.getPos().x, westU.getPos().y)
+                eff.setScale(2.5)
+                eff.destr()
+    
+                eff = AddSpecialEffect("FrostNova.mdx", westU.getPos().x, westU.getPos().y)
+                eff.setScale(2.5)
+                eff.destr()
+    
+                eff = AddSpecialEffect("FrostNova.mdx", westU.getPos().x, westU.getPos().y)
+                eff.setScale(2.5)
+                eff.destr()
+    
+                eff = AddSpecialEffect("FrostNova.mdx", westU.getPos().x, westU.getPos().y)
+                eff.setScale(2.5)
+                eff.destr()
+
+                for u in enemies 
+                    caster.damageTargetEx(u, finalExplosionDamage, DamageTypeCustom.SPELL, false)
+
+            northU.kill()
+            northU.remove()
+
+            southU.kill()
+            southU.remove()
+
+            eastU.kill()
+            eastU.remove()
+
+            westU.kill()
+            westU.remove()

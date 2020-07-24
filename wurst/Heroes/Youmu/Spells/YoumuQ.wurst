@@ -1,0 +1,112 @@
+package YoumuQ
+import ChannelAbilityPreset
+import Assets
+import ClosureEvents
+import DamageTargetExtensions
+import ClosureTimers
+import Wurst
+import SpellDamageCalculationExtensions
+import YoumuFeel
+import LinkedList
+import Vector2Extensions
+import YoumuHelper
+import AbilityTooltipsHelpers
+
+@configurable public real BASE_DAMAGE = 100
+@configurable public real BONUS_DAMAGE 
+@configurable public DamageTypeCustom DAMAGE_TYPE = DamageTypeCustom.SPELL
+              
+@configurable public string SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Orc\\Orcblood\\BattrollBlood.mdl"
+@configurable public string SECONDARY_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\BloodElfSpellThiefBlood.mdl"
+@configurable public string THIRD_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl"
+@configurable public string FOURTH_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\HumanBloodLarge0.mdl"
+@configurable public string FIFTH_SPELL_EFFECT_PATH = "baojiang.mdx"
+
+@configurable public string BONUS_EFFECT_PATH 
+@configurable public real SPELL_EFFECT_DURATION
+@configurable public real SPELL_RADIUS = 75 
+
+@configurable public string SPELL_ICON 
+@configurable public string SPELL_NAME 
+@configurable public string SPELL_TT_NORMAL = "Heart Excerpt Slash"
+@configurable public string SPELL_TT_EXTENDED  = "[Active]|n|nYoumu blinks to target unit, slashing them on arrival.|n|nMyon Effect: Myon deals 100% of this spell's damage extra per clone|nDamage: 100 + STR*3 + AGI*7 |nCast Range: 700|nCooldown: 6s"
+              
+@configurable public real BUFF_DURATION = 4
+@configurable public string BUFF_EFFECT_PATH 
+              
+@configurable public string BUFF_NAME 
+@configurable public string BUFF_TT 
+              
+@configurable public real INT_MULTIPLIER = 0
+@configurable public real STRENGTH_MULTIPLIER = 3
+@configurable public real AGI_MULTIPLIER = 7
+
+public constant YOUMU_Q_ID = compiletime(ABIL_ID_GEN.next())
+
+@compiletime function CreateHeroineQ()
+    new ChannelAbilityPreset(YOUMU_Q_ID, 5, true)
+        ..setHeroAbility(true)
+        ..presetHotkey("Q")
+        ..setName("Youmu Q")
+        ..setButtonPositionNormalX(0)
+        ..setButtonPositionNormalY(2)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, GenerateSpellName(SPELL_TT_NORMAL))
+        ..setTooltipNormalExtended(1, GenerateSpellBody(SPELL_TT_EXTENDED))
+        ..presetTargetTypes(Targettype.UNIT)
+        ..presetTargetsAllowed( (int lvl) ->TargetsAllowed.enemies)
+        ..setLevels(5)
+        ..presetManaCost(lvl -> 0)
+        ..presetCooldown(lvl -> 6)
+        ..presetIcon(Icons.bTNBreathOfFire)
+        ..presetCastRange(lvl -> 700.0)
+
+function spawnGhost(unit target, unit youmu)  returns LinkedList<unit>
+    var targetLoc = target.getPos()
+    var youmuLoc = youmu.getPos()
+    var angle = targetLoc.angleTo(youmuLoc)
+    var dummyList = new LinkedList<unit>()
+
+    int procs = CalculateMultiCasts(youmu.getAgi(true))
+
+    for int x = 0 to procs
+        var dummyLoc = youmuLoc.getRandomVecAroundVec(youmuLoc, 200)
+        var dummy = createUnit(youmu.getOwner(), YOUMU_GHOST_DUMMY_UNIT, dummyLoc, angle)
+        DestroyEffect(AddSpecialEffectTargetUnitBJ("origin", dummy, Abilities.blinkCaster))
+        dummyList.add(dummy)
+    return dummyList
+
+init   
+    registerSpellEffectEvent(YOUMU_Q_ID) ->
+        var triggerUnit = GetTriggerUnit()
+        var target = GetSpellTargetUnit()
+        var dummyList = spawnGhost(target, triggerUnit)
+
+        doAfter(.1) ->
+            var damage = triggerUnit.calculateSpellDamage(
+                STRENGTH_MULTIPLIER,
+                AGI_MULTIPLIER,
+                INT_MULTIPLIER,
+                BASE_DAMAGE,
+                YOUMU_Q_ID)
+
+            SetUnitX(triggerUnit, target.getX())
+            SetUnitY(triggerUnit, target.getY())
+
+            int x = 0
+            for u in dummyList
+                var loc = target.getPos()
+                var dummyLoc = loc.polarOffset(60*x .toReal().fromDeg(), 100)
+                var angle = dummyLoc.angleTo(loc)
+                u.setPos(dummyLoc)
+                u.setFacing(angle)
+                u.setAnimation(1)
+                x++
+                triggerUnit.damageTargetEx(target, damage, DAMAGE_TYPE, false)
+            triggerUnit.damageTargetEx(target, damage, DAMAGE_TYPE, false)
+            
+        doAfter(.6) ->
+            for u in dummyList
+                u.kill()
+                u.remove()

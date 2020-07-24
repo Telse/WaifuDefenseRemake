@@ -1,0 +1,162 @@
+package MedeaQ
+import ObjectIdGenerator
+import DamageTargetExtensions
+import ChannelAbilityPreset
+import IBaseSpellConfigurable
+import ClosureEvents
+import ClosureTimers
+import GroupUnitsInRange
+import HealUnit
+import SpellDamageCalculationExtensions
+import EffectExtensions
+import AbilityTooltipsHelpers
+
+@configurable public real BASE_DAMAGE = 10
+@configurable public real BONUS_DAMAGE 
+@configurable public DamageTypeCustom DAMAGE_TYPE = DamageTypeCustom.SPELL
+              
+@configurable public string SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Orc\\Orcblood\\BattrollBlood.mdl"
+@configurable public string SECONDARY_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\BloodElfSpellThiefBlood.mdl"
+@configurable public string THIRD_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl"
+@configurable public string FOURTH_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\HumanBloodLarge0.mdl"
+@configurable public string FIFTH_SPELL_EFFECT_PATH = "baojiang.mdx"
+
+@configurable public string BONUS_EFFECT_PATH 
+@configurable public real SPELL_EFFECT_DURATION
+@configurable public real SPELL_RADIUS = 75 
+
+@configurable public string SPELL_ICON 
+@configurable public string SPELL_NAME 
+@configurable public string SPELL_TT_NORMAL = "Holy Magecraft"
+@configurable public string SPELL_TT_EXTENDED  = "[Active]|n|nMedea launches a ball of holy energy that explodes and heal a single ally, then branches out and heals other allies in range.|n|nInitial Heal Amount: Level*100 + INT*10 + STR*5|nSecondary Heal Amount: Level*10 + INT*1 + STR*.5|nRange: 1000|nCooldown: 11s"
+              
+@configurable public real BUFF_DURATION = 4
+@configurable public string BUFF_EFFECT_PATH 
+              
+@configurable public string BUFF_NAME 
+@configurable public string BUFF_TT 
+              
+@configurable public real INT_MULTIPLIER = 1
+@configurable public real STRENGTH_MULTIPLIER = .5
+@configurable public real AGI_MULTIPLIER = 0
+
+public constant MEDEA_Q_ID = compiletime(ABIL_ID_GEN.next())
+public constant MEDEA_Q_DUMMY_UNIT = compiletime(UNIT_ID_GEN.next())
+
+@compiletime function CreateMedeaQ()
+    new ChannelAbilityPreset(MEDEA_Q_ID, 5, true)
+        ..setHeroAbility(true)
+        ..presetHotkey("Q")
+        ..setName("Medea Q")
+        ..setButtonPositionNormalX(0)
+        ..setButtonPositionNormalY(2)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, GenerateSpellName(SPELL_TT_NORMAL))
+        ..setTooltipNormalExtended(1, GenerateSpellBody(SPELL_TT_EXTENDED))
+        ..presetTargetTypes(Targettype.POINT)
+        ..setLevels(5)
+        ..presetManaCost(lvl -> 0)
+        ..presetCooldown(lvl -> 11)
+        ..presetIcon(Icons.bTNBreathOfFire)
+        ..presetCastRange(lvl -> 700.0)
+
+@compiletime function CreateMedeaQDummy()
+        new UnitDefinition(MEDEA_Q_DUMMY_UNIT, 'hfoo')
+        ..setName("Gungnir")
+        ..setIconGameInterface("ReplaceableTextures\\CommandButtons\\BTNElvenFarm.blp")
+        ..setModelFile("HolySmiteMissileNew.mdx")
+        ..setMovementType(MovementType.Fly)
+        ..setRace(Race.Human)
+        ..setAttacksEnabled(0)
+        ..setSpeedBase(20)
+        ..setManaInitialAmount(20)
+        ..setManaMaximum(100)
+        ..setManaRegeneration(0)
+        ..setNormalAbilities(commaList('Avul', 'Aloc'))
+        ..setShadowImageCenterX(0)
+        ..setShadowImageCenterY(0)
+        ..setShadowImageUnit("")
+        ..setShadowImageHeight(0)
+        ..setShadowImageWidth(0)
+        ..setCollisionSize(32)
+        ..setFoodCost(0)
+        ..setSightRadiusDay(0)
+        ..setSightRadiusNight(0)
+        //..setAttack1CooldownTime(20)
+        ..setAttacksEnabled(0)
+        //..setAttack1AnimationBackswingPoint(.1)
+        //..setAttack1AnimationDamagePoint(.1)
+        //..setAttack1WeaponSound(WeaponSound.MetalHeavySlice)
+        ..setDeathTimeseconds(.1)
+        ..setTurnRate(3.0)
+        ..setScalingValue(2)
+
+
+init   
+    registerSpellEffectEvent(MEDEA_Q_ID) ->
+        var triggerUnit = GetTriggerUnit()
+        var target = getSpellTargetPos()
+        var startPos = triggerUnit.getPos()
+        var fireAngle = startPos.angleTo(target)
+        bool exploded = false
+
+        startPos = startPos.polarOffset(fireAngle, 100)
+        var dummy = createUnit(triggerUnit.getOwner(), MEDEA_Q_DUMMY_UNIT, startPos, fireAngle)
+        var dummyPos = dummy.getPos3Real()
+
+        dummyPos.z += 100
+        dummy.setXYZ(dummyPos)
+
+        var healing = triggerUnit.calculateSpellDamage(
+            STRENGTH_MULTIPLIER, 
+            AGI_MULTIPLIER, 
+            INT_MULTIPLIER, 
+            BASE_DAMAGE, 
+            MEDEA_Q_ID)
+
+        real firstDistance = 10
+        doPeriodicallyCounted(.03, 100) cb ->
+            var moveLoc = startPos.polarOffset(fireAngle, firstDistance)
+            dummy.setX(moveLoc.x)
+            dummy.setY(moveLoc.y)
+            firstDistance+=10
+
+            var initialAllies = moveLoc.getAlliesInRange(moveLoc, triggerUnit, 85)
+            if initialAllies.size() > 0 and exploded == false
+                exploded = true
+                dummy.kill()
+                dummy.remove()
+
+                var firstOfGroupPos = FirstOfGroup(initialAllies).getPos()
+                var effInitial = AddSpecialEffect(
+                    Abilities.holyBoltSpecialArt, 
+                    firstOfGroupPos.x, 
+                    firstOfGroupPos.y)
+
+                effInitial.setScale(3)
+                DestroyEffect(effInitial)
+
+                for ally in initialAllies
+                    triggerUnit.healUnit(triggerUnit, healing*10, ally)
+
+                real distance = 50
+                doPeriodicallyCounted(.5, 5) cb ->
+                    
+                    for int x = 0 to 35
+                        var tempPos = firstOfGroupPos.polarOffset((x*10).toReal().fromDeg(), distance)
+                        
+                        var eff = AddSpecialEffect(Abilities.holyBoltSpecialArt, tempPos.x, tempPos.y)
+                        eff.setScale(.2)
+                        DestroyEffect(eff)
+        
+                        var allies = tempPos.getAlliesInRange(tempPos, triggerUnit, 85)
+        
+                        for ally in allies
+                            triggerUnit.healUnit(triggerUnit, healing, ally)
+                    
+                    distance+= 100
+        
+        doAfter(3.05) ->
+            dummy.kill()
+            dummy.remove()

@@ -1,0 +1,39 @@
+package BossHpBar
+import ClosureTimers
+import BossLogic
+import BossHpBarsInit
+
+init
+    doPeriodically(.03) cb ->
+        if CurrentBoss != null
+            if BossRageBar != null and BossHpBar != null
+                BossRageBar.show(localPlayer)
+                BossHpBar.show(localPlayer)
+
+                BossHpBar.setValueAll(
+                    players[23], 
+                    CurrentBoss.GetBossUnit().getHP()/CurrentBoss.GetBossUnit().getMaxHP(), 
+                    true, 
+                    true)
+
+                BossRageBar.setValueAll(
+                    players[23], 
+                    CurrentBoss.GetRage()/150, 
+                    true, 
+                    true)
+                
+                BossHpBar.setTextAll(
+                    players[23],
+                    CurrentBoss.GetBossUnit().getHP().toInt().toString() 
+                    + "/" 
+                    + CurrentBoss.GetBossUnit().getMaxHP().toInt().toString())
+
+                BossRageBar.setTextAll(
+                    players[23],
+                    CurrentBoss.GetRage().toString() 
+                    + "/" 
+                    + "150")
+        else
+            if BossRageBar != null and BossHpBar != null
+                BossRageBar.hide(localPlayer)
+                BossHpBar.hide(localPlayer)

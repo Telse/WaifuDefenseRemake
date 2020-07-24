@@ -1,0 +1,49 @@
+package MedeaPassive
+import ClosureTimers
+import IBaseSpellConfigurable
+import HealUnit
+import FloatingDamage
+import MedeaLilyId
+import ChannelAbilityPreset
+import AbilityTooltipsHelpers
+import GameSystemConstants
+
+public constant MEDEA_PASSIVE_ID = compiletime(ABIL_ID_GEN.next())
+
+@configurable public string SPELL_NAME = "Ephemeral Romance"
+@configurable public string SPELL_TT_NORMAL = "Ephemeral Romance"
+@configurable public string SPELL_TT_EXTENDED  = "[Passive]|n|nMedea restores HP and Mana every 5 seconds.|n|nRestored HP: 10 + STR/2|nRestored Mana: 10 + INT/2"
+
+@compiletime function CreateMedeaPassive()
+    new ChannelAbilityPreset(MEDEA_PASSIVE_ID, 5, true)
+        ..setHeroAbility(true)
+        ..presetHotkey("")
+        ..setName(SPELL_NAME)
+        ..setButtonPositionNormalX(2)
+        ..setButtonPositionNormalY(1)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, GenerateSpellName(SPELL_TT_NORMAL))
+        ..setTooltipNormalExtended(1, GenerateSpellBody(SPELL_TT_EXTENDED))
+        ..presetTargetTypes(Targettype.NONE)
+        ..setLevels(5)
+        ..presetManaCost(lvl -> 0)
+        //..presetCooldown(lvl -> .5)
+        ..presetIcon(Icons.bTNBreathOfFire)
+        ..presetCastRange(lvl -> 700.0)
+
+
+init
+    doPeriodically(5) cb ->
+        var medea =  PlayerUnits.filter(t -> t.getTypeId() == MEDEALILY_ID).getFirst()
+        if medea != null
+            AddSpecialEffectTargetUnitBJ("origin", medea, Abilities.healTarget)
+            var hpHealing = 10 + medea.getStr(true)*.5
+            var manaHealing = 10 + medea.getInt(true)*.5
+
+            medea.healUnit(medea, hpHealing, medea)
+            medea.addMana(manaHealing)
+            ShowManaRestoreText(medea, manaHealing.toInt().toString())
+            medea = null
+
+        medea = null

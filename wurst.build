@@ -1,0 +1,6 @@
+---
+projectName: TestMigration
+buildMapData:
+  name: MyMapName
+  fileName: MyMapFile
+  author: Bahaa

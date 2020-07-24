@@ -1,0 +1,116 @@
+package SakuyaE
+import ClosureEvents
+import SakuyaR
+import ClosureTimers
+import SakuyaKnivesInitialHash
+import SakuyaKnifeDummy
+import ChannelAbilityPreset
+import AbilityTooltipsHelpers
+import DamageTargetExtensions
+import Icons
+
+public constant SAKUYAE_ID = compiletime(ABIL_ID_GEN.next())
+
+@configurable public real BASE_DAMAGE = 100
+@configurable public real BONUS_DAMAGE 
+@configurable public DamageTypeCustom DAMAGE_TYPE = DamageTypeCustom.SPELL
+              
+@configurable public string SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Orc\\Orcblood\\BattrollBlood.mdl"
+@configurable public string SECONDARY_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\BloodElfSpellThiefBlood.mdl"
+@configurable public string THIRD_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl"
+@configurable public string FOURTH_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\HumanBloodLarge0.mdl"
+@configurable public string FIFTH_SPELL_EFFECT_PATH = "baojiang.mdx"
+
+@configurable public string BONUS_EFFECT_PATH 
+@configurable public real SPELL_EFFECT_DURATION
+@configurable public real SPELL_RADIUS = 75 
+@configurable public real SPELL_CAST_RANGE = 700
+
+@configurable public string SPELL_ICON 
+@configurable public string SPELL_NAME 
+@configurable public string SPELL_TT_NORMAL = "Conjuring [Eternal Meek]"
+@configurable public string SPELL_TT_EXTENDED  = "[Active]|n|nSakuya sends knives forwards rapid-fire. There's a rumor that she's just flinging them around out of desperation, but nobody knows for sure.|n|nDamage per Knife: 40/Level + AGI*1|nNumber of Knives: 10 + 1/Level|nCooldown: 22s"
+              
+@configurable public real BUFF_DURATION = 4
+@configurable public string BUFF_EFFECT_PATH 
+              
+@configurable public string BUFF_NAME 
+@configurable public string BUFF_TT 
+              
+@configurable public real INT_MULTIPLIER = 3
+@configurable public real STRENGTH_MULTIPLIER = 2
+@configurable public real AGI_MULTIPLIER = 0
+
+int orderId = 852097
+
+@compiletime function createSpell()
+    new ChannelAbilityPreset(SAKUYAE_ID, 5, true)
+        ..setHeroAbility(true)
+        ..presetHotkey("E")
+        ..setName("Sakuya E")
+        ..setButtonPositionNormalX(2)
+        ..setButtonPositionNormalY(2)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, GenerateSpellName(SPELL_TT_NORMAL))
+        ..setTooltipNormalExtended(1, GenerateSpellBody(SPELL_TT_EXTENDED))
+        ..presetTargetTypes(Targettype.POINT)
+        ..setLevels(5)
+        ..presetCastRange(lvl -> SPELL_CAST_RANGE)
+        ..presetManaCost(lvl -> 0)
+        ..presetCooldown(lvl -> 22)
+        ..presetIcon(Icons.bTNBreathOfFire)
+        ..presetCastRange(lvl -> 700.0)
+        ..presetFollowThroughTime(lvl -> 1.5)
+
+function GenerateKnives(unit tU, vec2 targetPos)
+    var spellLevel = tU.getAbilityLevel(SAKUYAE_ID)
+    
+    doPeriodicallyCounted(.1, 10 + spellLevel) cb ->
+
+        var currentOrder = GetUnitCurrentOrder(tU)
+        Log.info("Order: " + currentOrder.toString())
+
+        if(currentOrder == orderId)
+            //SetUnitAnimationByIndex(tU, 3)
+            var angle = tU.getPos().angleTo(targetPos)
+            var dummy = CreateUnit(GetOwningPlayer(tU), SAKUYA_KNIFE_DUMMY_UNIT, GetUnitX(tU) + GetRandomInt(-50, 50), GetUnitY(tU)+ GetRandomInt(-50, 50), angle.degrees())
+            var unitPos = dummy.getPos3Real()
+
+            SaveSakuyaKnivesInitialHashUnit(dummy, unitPos.z)
+            SaveSakuyaKnivesInitialHashUnitDamage(dummy, (GetHeroAgi(tU, true) * 1) + GetUnitAbilityLevel(tU, SAKUYAE_ID) * 40.0)
+            SaveSakuyaKnivesInitialHashUnitDuration(dummy, 5)
+            AddToSakuyaKnivesInitialHashUnitGroup(dummy)
+            SaveSakuyaKnivesInitialHashUnitSpeed(dummy, 40)
+            
+            dummy = null
+
+function GenerateTimeStoppedKnives(unit tU, vec2 targetPos)
+    var spellLevel = tU.getAbilityLevel(SAKUYAE_ID)
+    doPeriodicallyCounted(.1, 10 + spellLevel) cb ->
+        var currentOrder = GetUnitCurrentOrder(tU)
+        Log.info("Order: " + currentOrder.toString())
+
+        if(currentOrder == orderId)
+            //SetUnitAnimationByIndex(tU, 3)
+            var angle = tU.getPos().angleTo(targetPos)
+            var dummy = CreateUnit(GetOwningPlayer(tU), SAKUYA_KNIFE_DUMMY_UNIT, GetUnitX(tU) + GetRandomInt(-50, 50), GetUnitY(tU)+ GetRandomInt(-50, 50), angle.degrees())
+            var unitPos = dummy.getPos3Real()
+
+            SaveSakuyaKnivesInitialHashUnit(dummy, unitPos.z)
+            SaveSakuyaKnivesInitialHashUnitDamage(dummy, (GetHeroAgi(tU, true) * 2) + GetUnitAbilityLevel(tU, SAKUYAE_ID) * 80.0)
+            SaveSakuyaKnivesInitialHashUnitDuration(dummy, 5)
+            SaveSakuyaKnivesInitialHashUnitSpeed(dummy, 80)
+            GroupAddUnit(SakuyaRGroup, dummy)
+            
+            dummy = null
+init
+    registerSpellEffectEvent(SAKUYAE_ID) ->
+        var tU = GetTriggerUnit()
+        var targetPos = getSpellTargetPos()
+        
+        if(SakuyaRActive == false)
+            GenerateKnives(tU, targetPos)    
+
+        else
+            GenerateTimeStoppedKnives(tU, targetPos)

@@ -1,0 +1,22 @@
+package SeinPassiveObjects
+import ObjectIdGenerator
+import AbilityObjEditing
+import SeinPassiveConstants
+import Icons
+import AbilityTooltipsHelpers
+
+public constant SEIN_PASSIVE_ID = compiletime(ABIL_ID_GEN.next())
+
+@compiletime function createSpell()
+    new AbilityDefinitionBrewmasterDrunkenBrawler(SEIN_PASSIVE_ID)
+        ..setHeroAbility(true)
+        ..setName(SPELL_NAME)
+        ..setButtonPositionNormalX(2)
+        ..setButtonPositionNormalY(1)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, GenerateSpellName(SPELL_TT_NORMAL))
+        ..setTooltipNormalExtended(1, GenerateSpellBody(SPELL_TT_EXTENDED))
+        ..setLevels(1)
+        ..presetCastRange(lvl -> SPELL_CAST_RANGE)
+        ..presetIcon(Icons.bTNBreathOfFire)

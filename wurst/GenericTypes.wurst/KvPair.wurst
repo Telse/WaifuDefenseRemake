@@ -1,0 +1,9 @@
+package KvPair
+
+public class KvPair<T, Y>
+    T Key
+    Y Value
+
+    construct(T t, Y y)
+        Key = t
+        Value = y

@@ -1,0 +1,5 @@
+package MedeaLilyId
+import ObjectIdGenerator
+
+
+public constant MEDEALILY_ID = compiletime(HERO_ID_GEN.next())

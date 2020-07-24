@@ -1,0 +1,69 @@
+package SakuyaW
+import ClosureEvents
+import SakuyaWObjects
+import SakuyaKnivesInitialHash
+import SakuyaKnifeDummy
+import SakuyaR
+
+function GenerateKnives(unit triggerUnit)
+    SetUnitAnimationByIndex(triggerUnit, 8)
+    var angle = 0 .fromDeg()
+    var spellLevel = triggerUnit.getAbilityLevel(SAKUYAW_ID)
+
+    for int x = 0 to 8 + spellLevel
+        angle =  (x*45.0).fromDeg()
+        
+    
+        var dummy = CreateUnit(GetOwningPlayer(triggerUnit), 
+                                SAKUYA_KNIFE_DUMMY_UNIT, 
+                                GetUnitX(triggerUnit), 
+                                GetUnitY(triggerUnit), 
+                                angle.degrees())
+
+        var dummyPos = dummy.getPos3Real()
+        real damage = GetHeroAgi(triggerUnit, true) * 1 + GetUnitAbilityLevel(triggerUnit, SAKUYAW_ID) * 40.0
+
+        SaveSakuyaKnivesInitialHashUnit(dummy, dummyPos.z)
+        SaveSakuyaKnivesInitialHashUnitDamage(dummy, damage)
+        SaveSakuyaKnivesInitialHashUnitDuration(dummy, 5)
+        AddToSakuyaKnivesInitialHashUnitGroup(dummy)
+        SaveSakuyaKnivesInitialHashUnitSpeed(dummy, 40)
+        
+        dummy = null
+
+function GenerateTimeStoppedKnives(unit triggerUnit)
+    SetUnitAnimationByIndex(triggerUnit, 8)
+    var angle = 0 .fromDeg()
+    var spellLevel = triggerUnit.getAbilityLevel(SAKUYAW_ID)
+    
+    for int x = 0 to 8 + spellLevel
+        angle =  (x*(360/ (8+spellLevel))).fromDeg()
+        
+    
+        var dummy = CreateUnit(GetOwningPlayer(triggerUnit), 
+                                SAKUYA_KNIFE_DUMMY_UNIT, 
+                                GetUnitX(triggerUnit), 
+                                GetUnitY(triggerUnit), 
+                                angle.degrees())
+
+        var dummyPos = dummy.getPos3Real()
+        real damage = GetHeroAgi(triggerUnit, true) * 2 + GetUnitAbilityLevel(triggerUnit, SAKUYAW_ID) * 80.0
+
+        SaveSakuyaKnivesInitialHashUnit(dummy, dummyPos.z)
+        SaveSakuyaKnivesInitialHashUnitDamage(dummy, damage)
+        SaveSakuyaKnivesInitialHashUnitDuration(dummy, 5)
+        SaveSakuyaKnivesInitialHashUnitSpeed(dummy, 80)
+        GroupAddUnit(SakuyaRGroup, dummy)
+        
+        dummy = null
+init
+    registerSpellEffectEvent(SAKUYAW_ID) ->
+
+        var tU = GetTriggerUnit()
+        real damage = GetHeroAgi(tU, true) * 2 + GetUnitAbilityLevel(tU, SAKUYAW_ID) * 40.0
+        var targetPos = getSpellTargetPos()
+    
+        if(SakuyaRActive == false)
+            GenerateKnives(tU)
+        else
+            GenerateTimeStoppedKnives(tU)

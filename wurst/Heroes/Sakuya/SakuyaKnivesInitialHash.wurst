@@ -1,0 +1,20 @@
+package SakuyaKnivesInitialHash
+
+public hashtable SakuyaKnivesInitialHash = InitHashtable()
+public group SakuyaKnivesInitialHashUnitGroup = CreateGroup()
+    
+public function AddToSakuyaKnivesInitialHashUnitGroup(unit dummy)
+        GroupAddUnit(SakuyaKnivesInitialHashUnitGroup, dummy)
+    
+public function SaveSakuyaKnivesInitialHashUnit(unit dummyUnit, real zLocation)
+    SaveRealBJ(zLocation, StringHashBJ("Current Z"), GetHandleIdBJ(dummyUnit), SakuyaKnivesInitialHash)
+    
+public function SaveSakuyaKnivesInitialHashUnitDuration(unit dummyUnit, real duration)
+    SaveRealBJ(duration, StringHashBJ("Duration"), GetHandleIdBJ(dummyUnit), SakuyaKnivesInitialHash)
+    
+public function SaveSakuyaKnivesInitialHashUnitDamage(unit dummyUnit, real damage)
+    SaveRealBJ(damage, StringHashBJ("Damage"), GetHandleIdBJ(dummyUnit), SakuyaKnivesInitialHash)
+    
+public function SaveSakuyaKnivesInitialHashUnitSpeed(unit dummyUnit, integer speed)
+    SaveIntegerBJ(speed, StringHashBJ("Speed"), GetHandleIdBJ(dummyUnit), SakuyaKnivesInitialHash)
+

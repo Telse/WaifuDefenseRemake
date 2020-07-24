@@ -1,0 +1,39 @@
+package MissionVoting
+import ClosureEvents
+import PlayerEvents
+import KvPair
+import InitialShopsSpawn
+
+public constant PLAYER_VOTES = new LinkedList<KvPair<string, int>>()
+
+public function PlayersVotedForMission(int missionId) returns bool
+    bool allAgreed = true
+
+    for kv in  PLAYER_VOTES
+        if kv.Value != missionId
+            allAgreed = false
+
+    if PLAYER_VOTES.size() != ALL_PLAYERS.size()
+        allAgreed =  false
+
+    return allAgreed
+    
+init
+    EventListener.add(EVENT_PLAYER_UNIT_SELL_ITEM ) ->
+        var buyer = GetBuyingUnit()
+        var itm =  GetSoldItem()
+        var owner = buyer.getOwner()
+
+        var alreadyVoted = PLAYER_VOTES.filter(x -> x.Key == owner.getName())
+
+        if alreadyVoted.size() > 0 
+        and MISSION_ID_LIST.contains(itm.getTypeId())
+            PLAYER_VOTES.remove(alreadyVoted.getFirst())
+            PLAYER_VOTES.add(new KvPair(owner.getName(), itm.getTypeId()))
+
+        else if MISSION_ID_LIST.contains(itm.getTypeId())
+            PLAYER_VOTES.add(new KvPair(owner.getName(), itm.getTypeId()))
+
+        for kv in PLAYER_VOTES
+            Log.info("Name: " + kv.Key + " Vote: " + kv.Value.toString())
+

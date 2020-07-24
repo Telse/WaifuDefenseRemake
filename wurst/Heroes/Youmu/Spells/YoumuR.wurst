@@ -1,0 +1,168 @@
+package YoumuR
+import ChannelAbilityPreset
+import DamageTargetExtensions
+import IBaseSpellConfigurable
+import LinkedList
+import YoumuHelper
+import YoumuFeel
+import ClosureEvents
+import ClosureTimers
+import SpellDamageCalculationExtensions
+import GroupUnitsInRange
+import EffectExtensions
+import Vector2Extensions
+import AbilityTooltipsHelpers
+
+@configurable public real BASE_DAMAGE = 1000
+@configurable public real BONUS_DAMAGE 
+@configurable public DamageTypeCustom DAMAGE_TYPE = DamageTypeCustom.SPELL
+              
+@configurable public string SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Orc\\Orcblood\\BattrollBlood.mdl"
+@configurable public string SECONDARY_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\BloodElfSpellThiefBlood.mdl"
+@configurable public string THIRD_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Critters\\Albatross\\CritterBloodAlbatross.mdl"
+@configurable public string FOURTH_SPELL_EFFECT_PATH = "Objects\\Spawnmodels\\Human\\HumanBlood\\HumanBloodLarge0.mdl"
+@configurable public string FIFTH_SPELL_EFFECT_PATH = "baojiang.mdx"
+
+@configurable public string BONUS_EFFECT_PATH 
+@configurable public real SPELL_EFFECT_DURATION
+@configurable public real SPELL_RADIUS = 300 
+
+@configurable public string SPELL_ICON 
+@configurable public string SPELL_NAME 
+@configurable public string SPELL_TT_NORMAL = "Sword Skill [Thousand Cherry Blossoms]"
+@configurable public string SPELL_TT_EXTENDED  = "[Active]|n|nYoumu dashes straight and slashes all enemies she runs past, scattering Sakura Petals in her wake.|nYoumu is invulnerable during the cast of this spell.|n|nMyon Effect: Each copy of Myon mirrors this spell's damage and effect.|nDamage: 1000/Level + STR*5 + AGI*10|nAoE Width: 300|nAoe Length: 850|nCast Range: 700|nCast Time: 2.5s|nCooldown: 38s"
+
+@configurable public real BUFF_DURATION = 4
+@configurable public string BUFF_EFFECT_PATH 
+              
+@configurable public string BUFF_NAME 
+@configurable public string BUFF_TT 
+              
+@configurable public real INT_MULTIPLIER = 0
+@configurable public real STRENGTH_MULTIPLIER = 5
+@configurable public real AGI_MULTIPLIER = 10
+
+public constant YOUMU_R_ID = compiletime(ABIL_ID_GEN.next())
+
+@compiletime function CreateYoumuR()
+    new ChannelAbilityPreset(YOUMU_R_ID, 5, true)
+        ..setHeroAbility(true)
+        ..presetHotkey("R")
+        ..setName("Youmu R")
+        ..setButtonPositionNormalX(3)
+        ..setButtonPositionNormalY(2)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, GenerateSpellName(SPELL_TT_NORMAL))
+        ..setTooltipNormalExtended(1, GenerateSpellBody(SPELL_TT_EXTENDED))
+        ..presetTargetTypes(Targettype.POINT)
+        ..setLevels(5)
+        ..presetManaCost(lvl -> 0)
+        ..presetCooldown(lvl -> 38)
+        ..presetIcon(Icons.bTNBreathOfFire)
+        ..presetCastRange(lvl -> 700.0)
+
+function spawnGhost(unit youmu)  returns LinkedList<unit>
+    var youmuLoc = youmu.getPos()
+    var dummyList = new LinkedList<unit>()
+
+    int procs = CalculateMultiCasts(youmu.getAgi(true))
+
+    for int x = 0 to procs
+        var loc = youmu.getPos()
+        var dummyLoc = loc.polarOffset(60*x .toReal().fromDeg(), 150)
+        var angle = dummyLoc.angleTo(loc)
+        var dummy = createUnit(youmu.getOwner(), YOUMU_GHOST_DUMMY_UNIT, dummyLoc, youmu.getFacingAngle())
+
+        SetUnitTimeScalePercent(dummy, 500)
+        dummy.setAnimation(1)
+        DestroyEffect(AddSpecialEffectTargetUnitBJ("origin", dummy, Abilities.blinkCaster))
+        dummyList.add(dummy)
+    return dummyList
+
+
+init   
+    registerSpellEffectEvent(YOUMU_R_ID) ->
+        var triggerUnit = GetTriggerUnit()
+        var triggerUnitPos = triggerUnit.getPos()
+        var targetPos = getSpellTargetPos()
+        var distance = triggerUnitPos.distanceTo(targetPos)
+        var initialAngle = triggerUnitPos.angleTo(targetPos)
+
+
+        var damage = triggerUnit.calculateSpellDamage(
+            STRENGTH_MULTIPLIER,
+            AGI_MULTIPLIER,
+            INT_MULTIPLIER,
+            BASE_DAMAGE,
+            YOUMU_R_ID)
+
+        triggerUnit.pause()
+        triggerUnit.hide()
+        SetUnitTimeScalePercent(triggerUnit, 500)
+        triggerUnit.setAnimation("Attack 1")
+
+        int x = 1
+        var dummyList = spawnGhost(triggerUnit)
+        var count = dummyList.size()
+        var portion = 360/count
+
+        for u in dummyList
+            var newPos = targetPos.polarOffset(initialAngle + portion*x.toReal().fromDeg(), distance)
+            x++
+            u.setPos(newPos)
+            var newAngle = u.getPos().angleTo(targetPos)
+            u.setFacing(newAngle)
+            u.setAnimation("Spell Two")
+
+        doAfter(.5) ->
+            
+            for u in dummyList
+                DestroyEffect(AddSpecialEffectTargetUnitBJ("origin", u, "canying.mdx"))
+                u.setAnimation("Spell throw five")
+        
+        doAfter(.6) ->
+            for u in dummyList
+                u.hide()
+
+            doPeriodicallyCounted(.02, 15) cb -> 
+                for u in dummyList
+                    var moveLoc = u.getPos().polarOffset(u.getFacingAngle(), 60)
+                    u.setPos(moveLoc)
+                    var eff = AddSpecialEffect("hit slash.mdx", u.getX(), u.getY())
+                    var randomLoc = eff.getPos().getRandomVecAroundVec(eff.getPos(), 200)
+                    eff.setEffectFacingXY(eff, randomLoc.x, randomLoc.y)
+                    eff.setScale(4)
+                    DestroyEffect(eff)
+        
+        doAfter(1.6) ->
+                for u in dummyList
+                    SetUnitTimeScalePercent(u, 50)
+                    u.setAnimation("Spell four")
+                    u.show()
+                    var enemies = CreateGroup()
+
+                    for int y = 0 to 14
+                        var backLoc = u.getPos().polarOffset((u.getFacing() + 180) .fromDeg(), y*60 .toReal())
+                        var eff = AddSpecialEffect("VeilofPetalsSFX.mdx", backLoc.x, backLoc.y)
+                        eff.setColor(205, 105, 180)
+                        DestroyEffect(eff)
+                        var tempGroup = backLoc.getEnemiesInRange(backLoc, triggerUnit, 300)
+                        
+                        GroupAddGroup(tempGroup, enemies)
+                        DestroyGroup(tempGroup)
+                        tempGroup = null
+
+                    
+                    for uni in enemies
+                        triggerUnit.damageTargetEx(uni, damage, DAMAGE_TYPE, false)
+                    DestroyGroup(enemies)
+        
+        doAfter(2.5) ->
+            for u in dummyList
+                u.kill()
+                u.remove()
+            triggerUnit.unpause()
+            triggerUnit.show()
+            triggerUnit.getOwner().select(triggerUnit)
+            SetUnitTimeScalePercent(triggerUnit, 100)

@@ -1,0 +1,49 @@
+package FrostZigZagPattern
+import ISpell
+import BossHelpers
+import ClosureTimers
+import GroupUnitsInRange
+import DamageTargetExtensions
+import Abilities
+
+public class FrostZigZagPattern implements ISpell
+
+    bool _internalPauseTimer = false
+    real _pauseTime = 8
+    string _name = "Frozen Coffin"
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+    
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+
+        int y = 0
+        var startPos = caster.getPos()
+        doPeriodicallyCounted(1, 4) cb ->
+            int x = 0
+            real angle = y*90.0
+            y++
+            Log.info("Angle: " + angle.toString())
+    
+            doPeriodicallyCounted(.03, 200) cb ->
+                if x >= 50
+                    angle += 90
+                    x = 0
+    
+                startPos = startPos.polarOffset(angle .fromDeg(), 20)
+                var enemies = startPos.getEnemiesInRange(startPos, caster, 100)
+    
+                for u in enemies
+                    caster.damageTargetEx(u, 20, DamageTypeCustom.SPELL, false)
+    
+                x++
+                enemies.destr()
+                enemies =null
+    
+                flashEffect(Abilities.frostNovaTarget, startPos)

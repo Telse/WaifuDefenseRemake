@@ -1,0 +1,17 @@
+package PlayerCamCommands
+import ClosureEvents
+
+init
+    EventListener.add(EVENT_PLAYER_CHAT_FILTER) ->
+        var chatMessage = GetEventPlayerChatString()
+        var tp = GetTriggerPlayer()
+
+        var test = chatMessage.substring(5, 8)
+        Log.info(test)
+
+        if(chatMessage.substring(0, 4) == "-cam")
+            Log.info("cam command successfully input.")
+
+            var camDistance = chatMessage.substring(5, 8).toInt()
+
+            tp.setCameraField(CAMERA_FIELD_TARGET_DISTANCE, 20.0 * camDistance, 0)

@@ -1,0 +1,60 @@
+package FrozenWaves
+import ISpell
+import BossHelpers
+import ClosureTimers
+import Abilities
+import GroupUnitsInRange
+import DamageTargetExtensions
+
+public class FrozenWaves implements ISpell
+        
+    bool _internalPauseTimer = false
+    real _pauseTime = 10.1
+    string _name = "Frozen Waves"
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+    
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+        var initialPos = caster.getPos()
+
+        doPeriodicallyCounted(2, 2) cb ->
+            var startPos = initialPos
+            var distance = 50.0
+            var leftPos = startPos.polarOffset(180 .fromDeg(), 800)
+            var rightPos = startPos.polarOffset(360 .fromDeg(), 800)
+
+            doPeriodicallyCounted(.1, 40) cb ->
+                var left = true
+                var verticalDistance = - 800 
+                for int i = 0 to 10
+
+                    vec2 tempPos = startPos
+
+                    if left == true
+                        tempPos = leftPos.polarOffset(180 .fromDeg(), distance)
+                        tempPos.y += verticalDistance + i*200
+                        flashEffect(Abilities.frostNovaTarget, tempPos)
+                        left = false
+                    
+                    else if left == false
+                        tempPos = rightPos.polarOffset(360 .fromDeg(), distance)
+                        tempPos.y += verticalDistance + i*200
+                        flashEffect(Abilities.frostNovaTarget, tempPos)
+                        left = true
+
+                    var enemies = tempPos.getEnemiesInRange(tempPos, caster, 100)
+
+                    for u in enemies
+                        caster.damageTargetEx(u, 40, DamageTypeCustom.SPELL, false)
+    
+                    enemies.destr()
+                    enemies =null
+
+                distance -=50

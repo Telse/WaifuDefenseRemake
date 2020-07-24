@@ -1,0 +1,138 @@
+package Bar
+
+public class Bar
+    player owner 
+    framehandle parent 
+    framehandle fill
+    framehandle background
+    framehandle change 
+    framehandle shadow
+    framehandle text 
+    
+    static int count = 0 
+    var BAR_SMOOTHING_FACTOR = 0.04
+    var BAR_CHANGE_SMOOTHING_FACTOR = 0.04
+
+
+    construct(vec2 pos, real sizeX, real sizeY, playercolor color)
+        parent = createSimpleFrame("BarBordered", GAME_UI, count)
+        ..setAbsPoint(FRAMEPOINT_CENTER, pos)
+        ..setSize(sizeX, sizeY)
+        ..setParent(GAME_UI)
+
+        fill = getFrameByName("BarFill", count)
+        background = getFrameByName("BarBackground", count)
+        text = getFrameByName("BarText", count)
+        change = getFrameByName("BarChange", count)
+        shadow = getFrameByName("BarShadow", count)
+
+        fill
+        ..setPoint(FRAMEPOINT_TOPLEFT, parent, FRAMEPOINT_TOPLEFT)
+        ..setPoint(FRAMEPOINT_BOTTOMLEFT, parent, FRAMEPOINT_BOTTOMLEFT)
+        ..setAlpha(100)
+
+        change 
+        ..clearAllPoints()
+        ..setPoint(FRAMEPOINT_TOPLEFT, fill, FRAMEPOINT_TOPRIGHT)
+        ..setPoint(FRAMEPOINT_BOTTOMLEFT, fill, FRAMEPOINT_BOTTOMRIGHT)
+        ..setWidth(0.0001)
+
+        shadow
+        ..clearAllPoints()
+        ..setPoint(FRAMEPOINT_TOPLEFT, fill, FRAMEPOINT_TOPRIGHT)
+        ..setPoint(FRAMEPOINT_BOTTOMLEFT, fill, FRAMEPOINT_BOTTOMRIGHT)
+        ..setPoint(FRAMEPOINT_TOPRIGHT, parent, FRAMEPOINT_TOPRIGHT)
+        ..setPoint(FRAMEPOINT_BOTTOMRIGHT, parent, FRAMEPOINT_BOTTOMRIGHT)
+        ..setAlpha(255)
+
+        text
+        ..setPoint(FRAMEPOINT_CENTER, parent, FRAMEPOINT_CENTER)
+
+        string colorString = color.toInt().toString()
+        if colorString.length() == 1 
+            colorString = "0" + colorString
+        background
+        ..setTexture("Replaceabletextures\\Teamcolor\\Teamcolor"+colorString+".blp", 0, true)
+
+        count++ 
+
+
+    function setValue(player owner, real scale, bool applyChange)
+        setValue(owner, scale, applyChange, false)
+
+    function setValueAll(player owner, real scale, bool applyChange, bool smoothing)
+            let prevFillWidth = fill.getWidth()
+            var newFillWidth = parent.getWidth()*scale
+            if newFillWidth > 0 
+                if smoothing
+                    newFillWidth = prevFillWidth + (newFillWidth-prevFillWidth) * (1-BAR_SMOOTHING_FACTOR)
+                fill.setWidth(newFillWidth)    
+            else
+                fill.setWidth(0.0001)
+                newFillWidth = 0.
+
+            var newChangeFill = 0.
+            if applyChange and smoothing
+                newChangeFill = change.getWidth()
+                let delta =  prevFillWidth - newFillWidth
+                if delta > 0 
+                    newChangeFill += delta
+                else 
+                    newChangeFill = newChangeFill * BAR_CHANGE_SMOOTHING_FACTOR + delta
+            
+            if newChangeFill > 0 
+                change.setWidth(newChangeFill)
+            else 
+                change.setWidth(0.0001)
+
+    function setValue(player owner, real scale, bool applyChange, bool smoothing)
+        if localPlayer == owner
+            let prevFillWidth = fill.getWidth()
+            var newFillWidth = parent.getWidth()*scale
+            if newFillWidth > 0 
+                if smoothing
+                    newFillWidth = prevFillWidth + (newFillWidth-prevFillWidth) * (1-BAR_SMOOTHING_FACTOR)
+                fill.setWidth(newFillWidth)    
+            else
+                fill.setWidth(0.0001)
+                newFillWidth = 0.
+
+            var newChangeFill = 0.
+            if applyChange and smoothing
+                newChangeFill = change.getWidth()
+                let delta =  prevFillWidth - newFillWidth
+                if delta > 0 
+                    newChangeFill += delta
+                else 
+                    newChangeFill = newChangeFill * BAR_CHANGE_SMOOTHING_FACTOR + delta
+            
+            if newChangeFill > 0 
+                change.setWidth(newChangeFill)
+            else 
+                change.setWidth(0.0001)
+
+    function setText(player owner, string text)
+        if localPlayer == owner
+            this.text.setText(text)
+
+    function setTextAll(player owner, string text)
+            this.text.setText(text)
+
+    function setColor(player owner, playercolor color)
+        string colorString = color.toInt().toString()
+        if colorString.length() == 1 
+            colorString = "0" + colorString
+        if localPlayer == owner
+            background.setTexture("Replaceabletextures\\Teamcolor\\Teamcolor"+colorString+".blp", 0, true)
+
+    function hide(player owner)
+        if localPlayer == owner 
+            parent.hide()
+
+    function show(player owner) 
+        if localPlayer == owner
+            parent.show()
+
+    function Destroy()
+        owner = null
+        parent.remove()

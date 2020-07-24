@@ -1,0 +1,62 @@
+package Whirlwind
+
+import ISpell
+import ClosureTimers
+import Knockback3
+import GroupExtensions
+import BossHelpers
+import GroupUnitsInRange
+import DamageTargetExtensions
+import Abilities
+
+public class Whirlwind implements ISpell
+
+    bool _internalPauseTimer = false
+    real _pauseTime = 3.2
+    string _name = "Whirlwind"
+
+    real reactTime = 1.5
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+
+        for int x = 0 to 8
+            real angle = x*45.0
+            var pos = caster.getPos().polarOffset( angle.fromDeg(), 300)
+            SetBossAoeIndicator(pos, 150, 1)
+
+        doAfter(1.5) () ->
+            caster.setAnimation(8)
+            if caster.isAlive()
+
+                for int x = 0 to 8
+                    real angle = x*45.0
+                    var pos = caster.getPos().polarOffset( angle.fromDeg(), 300)
+                    pos.damageTargetEnemyGroupEx(caster, 180, 200, DamageTypeCustom.SPELL, false)
+                    flashEffect(Abilities.thunderclapCaster, pos)
+
+        doAfter(1.6) () ->
+            for int x = 0 to 4
+                real angle = x*90.0
+                var pos = caster.getPos().polarOffset( angle.fromDeg(), 450)
+                SetBossAoeIndicator(pos, 250, 1)
+
+        doAfter(2.8) () ->
+            caster.setAnimation(8)
+            if caster.isAlive()
+
+                for int x = 0 to 4
+                    real angle = x*90.0
+                    var pos = caster.getPos().polarOffset( angle.fromDeg(), 450)
+                    pos.damageTargetEnemyGroupEx(caster, 250, 200, DamageTypeCustom.SPELL, false)
+                    flashEffect(Abilities.thunderclapCaster, pos)
+
+

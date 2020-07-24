@@ -1,0 +1,61 @@
+package Whiteout
+import ISpell
+import BossHelpers
+import GroupUnitsInRange
+import ClosureTimers
+import DamageTargetExtensions
+
+public class Whiteout implements ISpell
+
+    bool _internalPauseTimer = false
+    real _pauseTime = 3
+    string _name = "Whiteout"
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+
+        var center = gg_rct_Boss1StageArea.getCenter()
+        caster.setPos(center)
+        var casterPos = caster.getPos()
+
+        SetBossAoeIndicator(casterPos, 900, 3)
+        SetBossAoeIndicatorColored(casterPos, 400, 3, 0, 255, 0)
+            
+        doAfter(3) () ->
+            var eff = AddSpecialEffect("FrostNova.mdx", casterPos.x, casterPos.y)
+            eff.setScale(1.7)
+            eff.destr()
+
+            eff = AddSpecialEffect("FrostNova.mdx", casterPos.x, casterPos.y)
+            eff.setScale(1.7)
+            eff.destr()
+
+            eff = AddSpecialEffect("FrostNova.mdx", casterPos.x, casterPos.y)
+            eff.setScale(1.7)
+            eff.destr()
+
+            eff = AddSpecialEffect("FrostNova.mdx", casterPos.x, casterPos.y)
+            eff.setScale(1.7)
+            eff.destr()
+
+            var totalEnemies = caster.getEnemiesInRangeBoss(900)
+            var safeEnemies = caster.getEnemiesInRangeBoss(400)
+
+            totalEnemies.removeGroup(safeEnemies)
+
+            for u in totalEnemies 
+                caster.damageTargetEx(u, 10, DamageTypeCustom.SPELL, false)
+
+            totalEnemies.destr()
+            totalEnemies = null
+
+            safeEnemies.destr()
+            safeEnemies = null

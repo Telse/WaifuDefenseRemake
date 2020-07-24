@@ -1,0 +1,8 @@
+package LevelUpGainStats
+import ClosureEvents
+
+init
+    EventListener.add(EVENT_PLAYER_HERO_LEVEL) ->
+        var play = GetTriggerPlayer()
+        play.addLumber(5)
+        

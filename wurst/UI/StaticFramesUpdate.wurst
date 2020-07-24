@@ -1,0 +1,22 @@
+package StaticFramesUpdate
+import ClosureTimers
+import StaticFramesLoad
+import PlayerStatsHashtable
+import IncreaseSpellDamage
+import IncreaseCritDamage
+import IncreaseCritChance
+import GameSystemConstants
+
+init
+    doPeriodically(.5) cb ->
+        for u in PlayerUnits
+            if u.getOwner() == GetLocalPlayer()
+
+                damageFrame.setText(u.getBaseDamage(0).toString())
+                armorFrame.setText(u.getArmor().toString())
+                strengthFrame.setText(u.getStr(true).toString())
+                agilityFrame.setText(u.getAgi(true).toString())
+                intelligenceFrame.setText(u.getInt(true).toString())
+                critFrame.setText(playerStats.loadInt(GetPlayerId(GetLocalPlayer()), critChanceHashKey.getHash()).toString() +"%")
+                critDamageFrame.setText(playerStats.loadInt(GetPlayerId(GetLocalPlayer()), critDamageHashKey.getHash()).toString() +"%")
+                spellDamageFrame.setText(playerStats.loadInt(GetPlayerId(GetLocalPlayer()), spellDamageHashKey.getHash()).toString() +"%")

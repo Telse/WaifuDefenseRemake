@@ -1,0 +1,11 @@
+package ISpell
+
+public interface ISpell
+
+    public real PauseTime
+
+    function Cast(unit caster)
+    function GetPauseTime() returns real
+    function GetName() returns string
+    function HasPauseLogic() returns bool 
+    

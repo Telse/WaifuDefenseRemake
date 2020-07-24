@@ -1,0 +1,57 @@
+package BackSwipe
+import ISpell
+import BossHelpers
+import GroupUnitsInRange
+import ClosureTimers
+import Abilities
+import DamageTargetExtensions
+
+public class BackSwipe implements ISpell
+
+    bool _internalPauseTimer = false
+    real _pauseTime = 2
+    string _name = "Backswipe"
+
+    function GetPauseTime() returns real
+        return _pauseTime
+
+    function GetName() returns string
+        return _name
+
+    function HasPauseLogic() returns bool
+        return _internalPauseTimer
+
+    function Cast(unit caster)
+        var frontLeft = caster.getPos().polarOffset(caster.getFacingAngle()+135.0 .fromDeg(), 200)
+        var frontRight = caster.getPos().polarOffset(caster.getFacingAngle()+225.0 .fromDeg(), 200)
+        var middle = caster.getPos().polarOffset(caster.getFacingAngle()+180 .fromDeg(), 200)
+
+        SetBossAoeIndicator(frontLeft, 150, 1)
+        SetBossAoeIndicator(frontRight, 150, 1)
+        SetBossAoeIndicator(middle, 150, 1)
+
+        doAfter(1.5) () ->
+            var enemies = middle.getEnemiesInRangeBoss(caster, 150)
+            var enemies2 = frontLeft.getEnemiesInRangeBoss(caster, 150)
+            var enemies3 = frontRight.getEnemiesInRangeBoss(caster, 150)
+
+            AddSpecialEffect(Abilities.thunderclapCaster, frontLeft.x, frontLeft.y).destr()
+            AddSpecialEffect(Abilities.thunderclapCaster, frontRight.x, frontRight.y).destr()
+            AddSpecialEffect(Abilities.thunderclapCaster, middle.x, middle.y).destr()
+        
+            caster.setAnimation("Attack Slam")
+
+            for u in enemies
+                caster.damageTargetEx(u, 30, DamageTypeCustom.SPELL, false)
+
+            enemies.destr()
+
+            for u in enemies2
+                caster.damageTargetEx(u, 30, DamageTypeCustom.SPELL, false)
+
+            enemies2.destr()
+
+            for u in enemies3
+                caster.damageTargetEx(u, 30, DamageTypeCustom.SPELL, false)
+
+            enemies3.destr()

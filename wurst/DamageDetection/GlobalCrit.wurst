@@ -1,0 +1,18 @@
+package GlobalCrit
+import PlayerStatsHashtable
+import IncreaseCritChance
+import IncreaseCritDamage
+
+real critDamageBase = 1.4
+
+public function ApplyCriticalStrike(real damage, unit sourceUnit) returns real
+    let currentPlayer = GetOwningPlayer(sourceUnit)
+    var chance = GetRandomInt(0, 100)
+    var critChance = playerStats.loadInt(GetPlayerId(currentPlayer), critChanceHashKey.getHash())
+    var critDamage = playerStats.loadInt(GetPlayerId(currentPlayer), critDamageHashKey.getHash())
+
+    if(chance < critChance)
+        return damage*(critDamageBase + (critDamage/100))
+    else
+        return damage
+

@@ -1,0 +1,10 @@
+package BossLogic
+import IBoss
+import ClosureTimers
+
+public IBoss CurrentBoss = null
+
+init 
+    doPeriodically(10) cb ->
+        if(CurrentBoss != null)
+            CurrentBoss.castSpell()

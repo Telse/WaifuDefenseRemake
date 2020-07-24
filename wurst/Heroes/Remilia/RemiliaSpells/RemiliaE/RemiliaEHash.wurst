@@ -1,0 +1,9 @@
+package RemiliaEHash
+
+public hashtable RemiliaEHash = InitHashtable()
+public group RemiliaEUnitGroup = CreateGroup()
+
+public function SaveRemiliaEUnit(unit dummyUnit, real duration)
+    SaveRealBJ(duration, StringHashBJ("Duration"), GetHandleIdBJ(dummyUnit), RemiliaEHash)
+    GroupAddUnit(RemiliaEUnitGroup, dummyUnit)
+

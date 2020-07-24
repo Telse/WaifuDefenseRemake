@@ -1,0 +1,51 @@
+package GroupUnitsSpell
+import ObjectIdGenerator
+import ChannelAbilityPreset
+import Icons
+import RegisterEvents
+import BossHelpers
+import EventHelper
+import GroupUnitsInRange
+import ClosureTimers
+
+public constant TEST_GROUP_SPELL_ID = compiletime(ABIL_ID_GEN.next())
+
+@compiletime function CreateTestAoeSpell()
+    new ChannelAbilityPreset(TEST_GROUP_SPELL_ID, 5, true)
+        ..setHeroAbility(false)
+        ..presetHotkey("Z")
+        ..setName("TEST AOE")
+        ..setButtonPositionNormalX(0)
+        ..setButtonPositionNormalY(2)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, "Test aoe circles")
+        ..setTooltipNormalExtended(1, "Test Aoe Circles")
+        ..presetTargetTypes(Targettype.POINT)
+        ..setLevels(1)
+        ..presetManaCost(lvl -> 0)
+        ..presetCooldown(lvl -> 2)
+        ..presetIcon(Icons.bTNBreathOfFire)
+
+
+init  
+    registerSpellEffectEvent(TEST_GROUP_SPELL_ID) ->
+        var triggerUnit = GetTriggerUnit()
+        var target = getSpellTargetPos()
+        int range =  1150
+
+        DrawAoeTester(target, range.toReal(), 9999)
+        SetBossAoeIndicator(target, range, 9999)
+
+        doPeriodically(1) cb ->
+            var test = target.groupUnitsInRange(range.toReal())
+            var other = target.getAlliesInRange(target, triggerUnit, range.toReal())
+
+            for u in other
+                var distance = u.getPos().distanceTo(target)
+                Log.info("BLIZZARD:: Range used: " + range.toString() +  " polled distance: " + distance.toString())
+
+            Log.info(" ")
+
+            test.destr()
+            test = null

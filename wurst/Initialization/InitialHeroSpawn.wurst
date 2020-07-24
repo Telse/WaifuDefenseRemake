@@ -1,0 +1,44 @@
+package InitialHeroSpawn
+import ClosureTimers
+import Remilia
+import LinkedList
+import Sakuya
+import Sein
+import YoumuFeel
+import MedeaLilyId
+
+var heroList = new LinkedList<int>()
+                    ..add(REMILIA_ID)
+                    ..add(SAKUYA_ID)
+                    ..add(SEIN_ID)
+                    ..add(YOUMU_ID)
+                    ..add(MEDEALILY_ID)
+
+public var rawHeroes = new LinkedList<unit>()
+
+var startVector = gg_rct_HeroSpawn.getLeftTop()
+var count = 0
+var initial = gg_rct_HeroSpawn.getLeftTop().x
+function SpawnHeroes(int heroId, real difference)
+    
+    rawHeroes.add(createUnit(players[22], heroId, startVector,  270.00 .fromDeg()))
+    startVector.x += difference
+
+    count++
+    if(count == 5)
+        startVector.y += difference
+        startVector.x = initial
+        count = 0
+
+init 
+    doAfter(1.) ->
+        var height = gg_rct_HeroSpawn.height()
+        var width = gg_rct_HeroSpawn.width()
+        
+        var test = gg_rct_HeroSpawn.getLeftTop()
+
+        var topLeft = gg_rct_HeroSpawn.getLeftTop()
+        var topRight = gg_rct_HeroSpawn.getRightTop()
+        real difference = (topRight.x - topLeft.x)/5
+
+        heroList.forEach(i -> SpawnHeroes(i, difference))

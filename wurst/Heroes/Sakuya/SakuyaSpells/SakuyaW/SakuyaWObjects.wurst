@@ -1,0 +1,27 @@
+package SakuyaWObjects
+import ObjectIdGenerator
+import ChannelAbilityPreset
+import SakuyaWConstants
+import Icons
+import AbilityTooltipsHelpers
+
+public constant SAKUYAW_ID = compiletime(ABIL_ID_GEN.next())
+
+@compiletime function createSpell()
+    new ChannelAbilityPreset(SAKUYAW_ID, 5, true)
+        ..setHeroAbility(true)
+        ..presetHotkey("W")
+        ..setName("Sakuya W")
+        ..setButtonPositionNormalX(1)
+        ..setButtonPositionNormalY(2)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, GenerateSpellName(SPELL_TT_NORMAL))
+        ..setTooltipNormalExtended(1, GenerateSpellBody(SPELL_TT_EXTENDED))
+        ..presetTargetTypes(Targettype.NONE)
+        ..setLevels(5)
+        ..presetCastRange(lvl -> SPELL_CAST_RANGE)
+        ..presetManaCost(lvl -> 0)
+        ..presetCooldown(lvl -> 12)
+        ..presetIcon(Icons.bTNBreathOfFire)
+        ..presetCastRange(lvl -> 700.0)

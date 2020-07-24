@@ -1,0 +1,33 @@
+package SetHeroHpAndMana
+
+import ClosureTimers
+import UiSelectionConstants
+
+init
+    doPeriodically(.03) cb ->
+        if (HpBar != null and ManaBar != null)
+            for kv in  PLAYER_UNIT_SELECTION
+                if(kv.play == localPlayer)
+                    HpBar.setValue(
+                        kv.play, 
+                        kv.u.getHP()/kv.u.getMaxHP(), 
+                        true, 
+                        true)
+
+                    ManaBar.setValue(
+                        kv.play, 
+                        kv.u.getMana()/kv.u.getMaxMana(), 
+                        true, 
+                        true)
+                    
+                    HpBar.setText(
+                        kv.play,
+                        kv.u.getHP().toInt().toString() 
+                        + "/" 
+                        + kv.u.getMaxHP().toInt().toString())
+
+                    ManaBar.setText(
+                        kv.play,
+                        kv.u.getMana().toInt().toString() 
+                        + "/" 
+                        + kv.u.getMaxMana().toInt().toString())

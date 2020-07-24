@@ -1,0 +1,45 @@
+package UiUnitSelect
+import ClosureEvents
+import UiSelectionConstants
+import UnitSelectionData
+import GameSystemConstants
+import SetButtonPositions
+import StaticFramesLoad
+
+int count = 0
+
+init
+    EventListener.add(EVENT_PLAYER_UNIT_SELECTED) ->
+        var tU = GetTriggerUnit()
+        var play = GetTriggerPlayer()
+
+        if(play == GetLocalPlayer())
+
+            if PlayerUnits.contains(tU) and tU.getOwner() == play
+                SetHeroSpellButtonScheme()
+                ShowPlayerStats()
+                Log.info("Player's hero selected")
+            
+            else if tU.isType(UNIT_TYPE_STRUCTURE)
+                ClearSpellButtonScheme()
+                HidePlayerStats()
+
+            else
+                Log.info("Normal unit selected")
+                ClearSpellButtonScheme()
+                HidePlayerStats()
+
+            Log.info("UI BUILDER: " + play.getName() + " has selected " + tU.getName())
+            Log.info(" ")
+
+            for fd in PLAYER_UNIT_SELECTION
+                if fd.play == play
+                    PLAYER_UNIT_SELECTION.remove(fd)
+                    fd.destr()
+
+            var frameData = new UnitSelectionData(tU, play)
+            PLAYER_UNIT_SELECTION.add(frameData)
+
+
+            tU = null
+            play = null

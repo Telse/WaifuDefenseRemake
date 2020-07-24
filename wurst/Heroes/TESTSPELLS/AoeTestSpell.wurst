@@ -1,0 +1,60 @@
+package AoeTestSpell
+
+import YoumuFeel
+import LinkedList
+import Vector2Extensions
+import YoumuHelper
+import AbilityTooltipsHelpers
+import ChannelAbilityPreset
+import Icons
+import RegisterEvents
+import BossHelpers
+import ClosureTimers
+import GroupUnitsInRange
+import FloatingDamage
+import ClosureEvents
+import DamageTargetExtensions
+
+public constant TEST_AOE_SPELL_ID = compiletime(ABIL_ID_GEN.next())
+public int Range = 50
+
+
+@compiletime function CreateTestAoeSpell()
+    new ChannelAbilityPreset(TEST_AOE_SPELL_ID, 5, true)
+        ..setHeroAbility(false)
+        ..presetHotkey("Z")
+        ..setName("TEST AOE")
+        ..setButtonPositionNormalX(0)
+        ..setButtonPositionNormalY(2)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, "Test aoe circles")
+        ..setTooltipNormalExtended(1, "Test Aoe Circles")
+        ..presetTargetTypes(Targettype.POINT)
+        ..setLevels(1)
+        ..presetManaCost(lvl -> 0)
+        ..presetCooldown(lvl -> 2)
+        ..presetIcon(Icons.bTNBreathOfFire)
+
+
+init
+    EventListener.add(EVENT_PLAYER_CHAT_FILTER) ->
+        var chatMessage = GetEventPlayerChatString()
+        Log.info("TEST SPELL Chat message: " + chatMessage)
+
+        Range = S2I(chatMessage)
+
+
+init  
+    registerSpellEffectEvent(TEST_AOE_SPELL_ID) ->
+        var triggerUnit = GetTriggerUnit()
+        var target = getSpellTargetPos()
+
+        DrawAoeTester(target, Range.toReal(), 4)
+        SetBossAoeIndicator(target, Range, 4)
+
+        doPeriodicallyTimed(.1, 4) cb ->
+            var allies = target.getAlliesInRange(target, triggerUnit, (Range - 25).toReal())
+            
+            for ally in allies
+                triggerUnit.damageTargetEx(ally, 1, DamageTypeCustom.NONE, true)

@@ -1,0 +1,34 @@
+package SeinRObjects
+import ObjectIdGenerator
+import ChannelAbilityPreset
+import SeinRConstants
+import Icons
+import BuffObjEditing
+import Abilities
+import AbilityTooltipsHelpers
+
+public constant SEIN_R_ID = compiletime(ABIL_ID_GEN.next())
+public constant SEIN_R_BUFF_OBJ = compiletime(createDummyBuffObject("Holy Shield", 
+                                                                    "Blocks a set amount of damage this unit takes before breaking.", 
+                                                                    Icons.bTNBearBlink, 
+                                                                    Abilities.immolationREDTarget, 
+                                                                    "chest"))
+
+@compiletime function createSpell()
+    new ChannelAbilityPreset(SEIN_R_ID, 5, true)
+        ..setHeroAbility(true)
+        ..presetHotkey("R")
+        ..setName("Sein R")
+        ..setButtonPositionNormalX(3)
+        ..setButtonPositionNormalY(2)
+        ..setButtonPositionResearchX(0)
+        ..setButtonPositionResearchX(0)
+        ..setTooltipNormal(1, GenerateSpellName(SPELL_TT_NORMAL))
+        ..setTooltipNormalExtended(1, GenerateSpellBody(SPELL_TT_EXTENDED))
+        ..presetTargetTypes(Targettype.POINT)
+        ..setLevels(5)
+        ..presetCastRange(lvl -> SPELL_CAST_RANGE)
+        ..presetManaCost(lvl -> 0)
+        ..presetCooldown(lvl -> 45)
+        ..presetIcon(Icons.bTNBreathOfFire)
+        ..presetCastRange(lvl -> 700.0)

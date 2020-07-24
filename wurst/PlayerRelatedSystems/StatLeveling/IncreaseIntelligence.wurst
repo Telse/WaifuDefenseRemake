@@ -1,0 +1,35 @@
+package IncreaseIntelligence
+import ChannelAbilityPreset
+import ClosureEvents
+import Icons
+
+public constant INCREASEINTELLIGENCE_ID = compiletime(ABIL_ID_GEN.next())
+
+@compiletime function CreateIncreaseIntelligence()
+    new ChannelAbilityPreset(INCREASEINTELLIGENCE_ID, 1, true)
+        ..setHeroAbility(false)
+        ..setHotkeyNormal("E")
+        ..presetTargetTypes(Targettype.NONE)
+        ..setManaCost(1, 0)
+        ..presetCooldown(lvl -> .1)
+        ..setName("Increase Intelligence")
+        ..setButtonPositionNormalX(2)
+        ..setButtonPositionNormalY(0)
+        ..setButtonPositionResearchX(2)
+        ..setButtonPositionResearchY(0)
+        ..setTooltipNormal(1, "Increase Intelligence - [E]")
+        ..setTooltipNormalExtended(1, "Cost: 1 stat point |n|nIncreases Intelligence by 1.")
+        ..setIconNormal("UI\\Widgets\\Console\\Human\\infocard-heroattributes-int.blp")
+
+init   
+    registerSpellEffectEvent(INCREASEINTELLIGENCE_ID) ->
+        let tp = GetTriggerPlayer()
+        var u = GetTriggerUnit()
+
+        if(tp.getLumber() >= 1)
+            tp.setLumber(tp.getLumber()-1)
+            u.addInt(1)
+        else
+            tp.print("Insufficient Stat points!", 1.5)
+
+

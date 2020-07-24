@@ -1,0 +1,6 @@
+package BossState
+
+public enum BossState
+    Basic
+    Advanced
+    Ultimate

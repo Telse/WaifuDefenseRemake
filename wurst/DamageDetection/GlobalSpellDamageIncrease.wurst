@@ -1,0 +1,9 @@
+package GlobalSpellDamageIncrease
+import PlayerStatsHashtable
+import IncreaseSpellDamage
+
+public function ApplySpellDamageIncrease(real damage, unit sourceUnit) returns real
+    let currentPlayer = GetOwningPlayer(sourceUnit)
+    var spellDamageIncrease = playerStats.loadInt(GetPlayerId(currentPlayer), spellDamageHashKey.getHash())
+
+    return damage + damage*(spellDamageIncrease/100)
